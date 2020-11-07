@@ -1,0 +1,5 @@
+# A WarCraft I játékkal játszó gépi intelligencia fejlesztése
+
+*BSc szakdolgozat*
+
+A Blizzard WarCraft I nevű játéka az egyik első valós idejű stratégiai játéknak tekinthető. A dolgozat azt tűzi ki célul, hogy ehhez egy olyan gépi intelligenciát készítsen, amely a játék eredeti formájában rendelkezésre álló grafikus felületen keresztül képes a játékkal játszani. Ehhez a dolgozat először áttekinti a játék szabályrendszerét, felírja annak absztrakt matematikai modelljét. Megvizsgálja, hogy milyen módon lehet a játék képernyőjét, mint adattömböt kezelni, a játék kurzorát programozott módon mozgatni, és kattintani vele. A program a kép alapján becslést ad a játékos és az ellenfél állapotára vonatkozóan, kiszámít egy racionális lépést amelyet azt követően végrehajt. A dolgozatban bemutatásra kerülnek az ehhez szükséges módszerek modelljei, az alkalmazás megtervezése és implementációja. A dolgozat a lejátszott játszmák alapján értékeli az elkészített gépi intelligencia hatékonyságát. Elemzi a más játékokra való adaptálhatóságának a lehetőségeit.
