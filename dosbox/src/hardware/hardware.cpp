@@ -485,7 +485,7 @@ FILE * OpenCaptureFile(const char * type,const char * ext) {
 		*test=0;
 		if (strncasecmp(tempname,file_start,strlen(file_start))!=0) continue;
 		Bitu num=atoi(&tempname[strlen(file_start)]);
-		if (num>=last) last=num+1;
+		//if (num>=last) last=num+1;	
 	}
 	close_directory( dir );
 	char file_name[CROSS_LEN];
