@@ -37,9 +37,13 @@
 
 #include "render_scalers.h"
 #include "render_glsl.h"
+#include <time.h>
+#include <sstream>
+#include <mouse.h>
 
 Render_t render;
 ScalerLineHandler_t RENDER_DrawLine;
+int fpsCounter = 0;
 
 static void RENDER_CallBack( GFX_CallBackFunctions_t function );
 
@@ -209,7 +213,7 @@ void RENDER_EndUpdate( bool abort ) {
 	if (GCC_UNLIKELY(!render.updating))
 		return;
 	RENDER_DrawLine = RENDER_EmptyLineHandler;
-	if (GCC_UNLIKELY(CaptureState & (CAPTURE_IMAGE|CAPTURE_VIDEO))) {
+	if (1) { // GCC_UNLIKELY(CaptureState & (CAPTURE_IMAGE|CAPTURE_VIDEO))
 		Bitu pitch, flags;
 		flags = 0;
 		if (render.src.dblw != render.src.dblh) {
@@ -223,6 +227,31 @@ void RENDER_EndUpdate( bool abort ) {
 			fps /= 1+render.frameskip.max;
 		CAPTURE_AddImage( render.src.width, render.src.height, render.src.bpp, pitch,
 			flags, fps, (Bit8u *)&scalerSourceCache, (Bit8u*)&render.pal.rgb );
+
+		time_t start = time(0);
+
+		std::stringstream sstr;
+		sstr << start;
+		int time;
+		std::istringstream(sstr.str()) >> time;
+		
+
+		if (time %2 == 0 && fpsCounter >= render.src.fps)
+		{
+			LOG_MSG(sstr.str().c_str());
+			//Mouse_CursorSet(0, 0);
+			CaptureState |= CAPTURE_IMAGE;
+
+			CAPTURE_AddImage(render.src.width==0?640:render.src.width, render.src.height==0?400:render.src.height, render.src.bpp, pitch,
+				flags, fps, (Bit8u*)&scalerSourceCache, (Bit8u*)&render.pal.rgb);
+			CaptureState = 0;
+			fpsCounter = 0;
+		}
+
+		else
+		{
+			fpsCounter++;
+		}
 	}
 	if ( render.scale.outWrite ) {
 		GFX_EndUpdate( abort? NULL : Scaler_ChangedLines );
