@@ -19,10 +19,8 @@ A szakdolgozat célja, egy olyan mesterséges intelligencia létrehozása, amely
 ### Első lépések
 
 A játék kora miatt futtatásához szükséges a dosbox nevű emulátor, ráadásul annak egy módosított változata, hogy képes legyen a képet x időnként automatikusan lementeni, továbbá fogadni az AI által adott üzenetet, és megfelelelően reagálni rá.
-Első lépésként a dosbox forráskódját kellett megszerezni[^1], majd követni a buildelési utasítást[^2]. Ez leírja hogyan kell lebuildelni a dosboxot és a hozzá tartozó függőségeket. Ezeknek a verziószáma is fontos a kompatibilitás miatt. Sajnos a buildelés nem ment zökkenőmentesen, ügyelni kellett hogy minden függőség 32 bites legyen, mert a dosbox is az. A képek készítéséért felelős programrész nem fordult le, és a hiba a Windows SDK-ban volt. Erre sokáig nem tudtam megoldást találni, majd egy régebbi SDK verziót választottam ki és úgy a fordítás sikeres volt.
+Első lépésként a [dosbox forráskódját](https://sourceforge.net/p/dosbox/code-0/HEAD/tree/dosbox/trunk/) kellett megszerezni , majd követni a [buildelési utasítást](https://www.dosbox.com/wiki/Building_DOSBox_with_Visual_Studio). Ez leírja hogyan kell lebuildelni a dosboxot és a hozzá tartozó függőségeket. Ezeknek a verziószáma is fontos a kompatibilitás miatt. Sajnos a buildelés nem ment zökkenőmentesen, ügyelni kellett hogy minden függőség 32 bites legyen, mert a dosbox is az. A képek készítéséért felelős programrész nem fordult le, és a hiba a Windows SDK-ban volt. Erre sokáig nem tudtam megoldást találni, majd egy régebbi SDK verziót választottam ki és úgy a fordítás sikeres volt.
 A buildelés után meg kellett találni a dosbox mely részét érdemes módosítani/bővíteni ahhoz hogy a képet le tudjam menteni. Ezt a render.cpp-ben találtam meg, az EndUpdate függvény végére az alábbi kódot írtam, ami jelenleg 2 másodpercenként menti le a képet.
-[^1]:Forrás: https://sourceforge.net/p/dosbox/code-0/HEAD/tree/dosbox/trunk/
-[^2]:Forrás: https://www.dosbox.com/wiki/Building_DOSBox_with_Visual_Studio
 ```c++
 // render.cpp adattagjainak bővítése
 int fpsCounter = 0; // Egy fps számláló, arra, hogy ne minden frame-ben hívódjon meg a kép lementése
@@ -58,8 +56,7 @@ time_t start = time(0); // jelenelgi idő lekérése
 
 ### Programok közötti kommunikáció
 
-Mivel a mesterséges intelligenciát pythonban lenne érdemes megírni, de a dosbox kódja C++, így elengedhetetlen valamilyen módon kapcsolatot létesíteni a 2 program között futási időben. Erre a legjobb választásnak a ZeroMQ[^3] nevű library tűnik, mivel a használata viszonylag egyszerű, gyors és rengeteg programozási nyelvet támogat. Készítettem egy teszt programot, ahol egy C++ban írt program üzenetet küld és fogad egy Pythonban írt programtól, ami azt demózza hogy működik és használható, a dosboxba való integrálásra kész. Ez a demo egy oda vissza kommunikációt mutat be, ugyanakkor lehetséges hogy elegendő egy fogadó és egy küldő.
-[^3]:Forrás: https://zeromq.org/
+Mivel a mesterséges intelligenciát pythonban lenne érdemes megírni, de a dosbox kódja C++, így elengedhetetlen valamilyen módon kapcsolatot létesíteni a 2 program között futási időben. Erre a legjobb választásnak a [ZeroMQ](https://zeromq.org/) nevű library tűnik, mivel a használata viszonylag egyszerű, gyors és rengeteg programozási nyelvet támogat. Készítettem egy teszt programot, ahol egy C++ban írt program üzenetet küld és fogad egy Pythonban írt programtól, ami azt demózza hogy működik és használható, a dosboxba való integrálásra kész. Ez a demo egy oda vissza kommunikációt mutat be, ugyanakkor lehetséges hogy elegendő egy fogadó és egy küldő.
 
 ### Összefoglalás
 
