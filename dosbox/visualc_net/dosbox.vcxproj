@@ -92,7 +92,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <OmitFramePointers>true</OmitFramePointers>
-      <AdditionalIncludeDirectories>../include;../../lpng1634;../../SDL-1.2.15-0/include;../src/platform/visualc;../../zlib-1.2.8;../../lpng1634/projects/vstudio/Release;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../include;../../lpng1634;../../SDL-1.2.15-0/include;../src/platform/visualc;../../zlib-1.2.8;../../lpng1634/projects/vstudio/Release;../../libzmq/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
@@ -111,7 +111,7 @@
       <CompileAs>Default</CompileAs>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>opengl32.lib;winmm.lib;zlib.lib;libpng16.lib;sdlmain.lib;sdl.lib;odbc32.lib;odbccp32.lib;ws2_32.lib;dxguid.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;winmm.lib;zlib.lib;libpng16.lib;sdlmain.lib;sdl.lib;odbc32.lib;odbccp32.lib;ws2_32.lib;dxguid.lib;../../libzmq/build/libzmq-v142-mt-4_3_4.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>.\Release/dosbox.exe</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <GenerateDebugInformation>true</GenerateDebugInformation>

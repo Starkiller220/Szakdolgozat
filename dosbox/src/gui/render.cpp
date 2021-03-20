@@ -40,10 +40,41 @@
 #include <time.h>
 #include <sstream>
 #include <mouse.h>
+#include <thread>
+#include <zmq.hpp>
+
+enum Message{
+	MOUSE
+};
+
 
 Render_t render;
 ScalerLineHandler_t RENDER_DrawLine;
 int fpsCounter = 0;
+
+void ZeroMQLoop()
+{
+
+	zmq::context_t context(1);
+	zmq::socket_t socket(context, ZMQ_REP);
+	socket.bind("tcp://*:5555");
+
+	while (true) {
+		zmq::message_t request;
+
+		//  Wait for request
+		socket.recv(&request);
+		LOG_MSG(request.to_string().c_str());
+
+		//  Reply request
+		zmq::message_t reply(5);
+		memcpy(reply.data(), "Message recieved!", 17);
+		
+		socket.send(reply);
+	}
+}
+
+std::thread t1(ZeroMQLoop);
 
 static void RENDER_CallBack( GFX_CallBackFunctions_t function );
 
@@ -207,7 +238,6 @@ static void RENDER_Halt( void ) {
 	render.updating=false;
 	render.active=false;
 }
-
 extern Bitu PIC_Ticks;
 void RENDER_EndUpdate( bool abort ) {
 	if (GCC_UNLIKELY(!render.updating))
@@ -234,7 +264,6 @@ void RENDER_EndUpdate( bool abort ) {
 		sstr << start;
 		int time;
 		std::istringstream(sstr.str()) >> time;
-		
 
 		if (time %2 == 0 && fpsCounter >= render.src.fps)
 		{
@@ -252,6 +281,8 @@ void RENDER_EndUpdate( bool abort ) {
 		{
 			fpsCounter++;
 		}
+		
+
 	}
 	if ( render.scale.outWrite ) {
 		GFX_EndUpdate( abort? NULL : Scaler_ChangedLines );
@@ -269,6 +300,7 @@ void RENDER_EndUpdate( bool abort ) {
 	render.frameskip.index = (render.frameskip.index + 1) & (RENDER_SKIP_CACHE - 1);
 	render.updating=false;
 }
+
 
 static Bitu MakeAspectTable(Bitu skip,Bitu height,double scaley,Bitu miny) {
 	Bitu i;
