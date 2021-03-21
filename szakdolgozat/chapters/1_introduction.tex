@@ -1,9 +1,13 @@
 \Chapter{Bevezetés}
 
-A fejezet célja, hogy a feladatkiírásnál kicsit részletesebben bemutassa, hogy miről fog szólni a dolgozat.
-Érdemes azt részletezni benne, hogy milyen aktuális, érdekes és nehéz probléma megoldására vállalkozik a dolgozat.
+A szakdolgozatom célja egy mesterséges intelligencia írása a Blizzard WarCraft I nevű játékára, amely kellő bonyolultságot ad ahhoz hogy a feladat ne legyen triviális, ugyanakkor megvalósítása nem a lehetetlen kategória, mivel egy régebbi játékról van szó.
 
-Ez egy egy-két oldalas leírás.
-Nem kellenek bele külön szakaszok (section-ök).
-Az irodalmi háttérbe, a probléma részleteibe csak a következő fejezetben kell belemenni.
-Itt az olvasó kedvét kell meghozni a dolgozat többi részéhez.
+Magát a játékot 1994ben adták ki MS-DOS-ra, és akkoriban forradalminak hatott az elődeihez képesti komplexitása miatt. Mára már ez nem állja meg a helyét ebben a kategóriában, de az intelligencia megírása szempontjából ez a hasznunkra válik. 
+
+Felmerülhet ugyanakkor a kérdés, hogy miért pont erre a játékra esett a választás? A fentebb leírt kor és komplexitás mellett azért választottam ezt a szoftvert, mert a beépített gépi ellenfelekkel való hadakozást nem tartom fernek. Természetesen hozzá lehet szokni és nem legyőzhetetlen, de számomra úgy érződik mintha csalna a program, ami nem meglepő, mert könnyebb volt így leprogramozni. Remélhetőleg méltó ellenfelére lel majd programba beépített intelligencia az enyémmel szemben.
+
+Na de hogy is néz ki maga a játék? A korából adódóan egy 2 dimenziós, úgymond felülnézetes programról van szó, melyben 2 faj, az emberek és az orkok hadakoznak egymás ellen, egy Azerothnak nevezett bolygón. Játékmenet szempontjából egyszerű a dolog, vannak épületek, egységek és nyersanyag. Utóbbiból 2 féle van, fa és arany, melyeket a parasztok gyűjthetnek be. Épületek szempontjából van amelyik a maximálisan képezhető egységek számát növeli, és van amelyikben katonákat lehet képezni. 
+
+Ugyanakkor a fentebb említett operációs rendszer miatt egy emulátoron keresztül fogjuk tudni elindítani magát a szoftvert. Ehhez a DosBox nevű nyílt forráskódú emulátor lesz a segítségünkre, mely több szempontból is kitűnő választás. A nyílt forráskód miatt belenyulhatunk az emulátorba, amire szükség is lesz, mivel az intelligencia képrenyőkép alapján fog döntéseket hozni, továbbá a döntés után reagálnia kell rá, így ezt mind mind a DosBoxon belül kell elintézni. Ez egy kihívásokkal teli feladat, mert egy nem általam írt kódban kell módosításokat végezni. Ezek után jön a lényegi feladat, maga az intelligencia megírása. 
+
+Remélhetőleg a szakdoglozat végére sikerül legalább megszorongatni a beépített ellenfelet, vagy le is győzni azt.
