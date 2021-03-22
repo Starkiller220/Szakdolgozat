@@ -1,78 +1,26 @@
-\Chapter{Tervezés}
+\Chapter{Felhasznált eszközök és technológiák}
 
-Itt kezdődik a dolgozat lényegi része, úgy értve, hogy a saját munka bemutatása.
-Jellemzően ebben szerepelni szoktak blokkdiagramok, a program struktúrájával foglalkozó leírások.
-Ehhez célszerű UML ábrákat (például osztály- és szekvenciadiagramokat) használni.
+\Section{Dosbox}
 
-Amennyiben a dolgozat inkább kutatás jellegű, úgy itt lehet konkretizálni a kutatási módszertant, a kutatás tervezett lépéseit, az indoklást, hogy mit, miért és miért pont úgy érdemes csinálni, ahogyan az a későbbiekben majd részletezésre kerül.
+A szoftver futtatásához elengedhetetlen egy DOS emulátor, amire a legjobb választás a nyílt forráskódú Dosbox. Az SDL multimédiás könyvtárat használja, és a lehető leghűbben lehet vele Dos-os környezetet emulálni. A nyílt forráskódnak köszönhetően betekintést lehet nyerni a működésébe, továbbá módosítani saját igényünknek megfelelően. 
 
-Ebben a fejezetben az implementáció nem kell, hogy túl nagy szerepet kapjon.
-Ez még csak a tervezési fázis.
-(Nyilván ha olyan a téma, hogy magának az implementációnak a módjával foglalkozik, adott formális nyelvet mutat be, úgy a kódpéldákat már innen sem lehet kihagyni.)
+\Section{OpenCv}
 
-\Section{Táblázatok}
+Az OpenCv (teljes nevén Open Source Computer Vision Library) a nevéből adódóan egy nyílt forráskódú gépi látás és tanulás könyvtár, mely elérhető számos nyelven. Azért jött létre, hogy közös infrastruktúrát biztosítson gépi látáshoz és tanuláshoz, ezáltal felgyorsítsa az ezt alkalmazó programok fejlődését, és megsokszorozza a számát. Manapság a könyvtár több mint 2500 algoritmust tartalmaz és folyamatosan bővül.
 
-Táblázatokhoz a \texttt{table} környezetet ajánlott használni.
-Erre egy minta \aref{tab:minta}. táblázat.
-A hivatkozáshoz az egyedi \texttt{label} értéke konvenció szerint \texttt{tab:} prefixszel kezdődik.
+\Section{ZeroMQ}
 
-\begin{table}[h]
-\centering
-\caption{Minta táblázat. A táblázat felirata a táblázat felett kell legyen!}
-\label{tab:minta}
-\begin{tabular}{l|c|c|}
-a & b & c \\
-\hline
-1 & 2 & 3 \\
-4 & 5 & 6 \\
-\hline
-\end{tabular}
-\end{table}
+A ZeroMQ egy beágyazható hálózati könyvtár, mely úgy működik mint egy párhuzamossági keretrendszer. Olyan socketeket biztosít, amelyek atomi üzeneteket szállítanak különböző transzportokon keresztül, például folyamaton belül, folyamatok között, TCP-n és multicastban. A socketeket N-ről-N-re összekapcsolhatjuk olyan mintákkal, mint a fan-out, pub-sub, task distribution és request-reply. Elég gyors ahhoz, hogy a klaszteres termékek szöveteként szolgáljon. Aszinkron I/O modellje aszinkron üzenetfeldolgozási feladatokként felépített, skálázható többmagos alkalmazásokat biztosít. Számos nyelvi API-val rendelkezik, és a legtöbb operációs rendszeren fut. Ez hatalmas előny 2 különböző nyelven írt program összekapcsolásánál, és pont ez az ami miatt ezt a könyvtárat választottam.
+\iffalse
+\Section{Python}
 
-\Section{Ábrák}
+asd
 
-Ábrákat a \texttt{figure} környezettel lehet használni.
-A használatára egy példa \aref{fig:cimer}. ábrán látható.
-Az \texttt{includegraphics} parancsba 
-Az ábrák felirata az ábra alatt kell legyen.
-Az ábrák hivatkozásához használt nevet konvenció szerint \texttt{fig:}-el célszerű kezdeni.
+\Section{Numpy}
 
-\begin{figure}[h]
-\centering
-\includegraphics[scale=0.3]{images/me_logo.png}
-\caption{A Miskolci Egyetem címere.}
-\label{fig:cimer}
-\end{figure}
+asd
 
-\Section{További környezetek}
+\Section{Pyteserract}
 
-A matematikai témájú dolgozatokban szükség lehet tételek és bizonyításaik megadására.
-Ehhez szintén vannak készen elérhető környezetek.
-
-\begin{definition}
-Ez egy definíció
-\end{definition}
-
-\begin{lemma}
-Ez egy lemma
-\end{lemma}
-
-\begin{theorem}
-Ez egy tétel
-\end{theorem}
-
-\begin{proof}
-Ez egy bizonyítás
-\end{proof}
-
-\begin{corollary}
-Ez egy tétel
-\end{corollary}
-
-\begin{remark}
-Ez egy megjegyzés
-\end{remark}
-
-\begin{example}
-Ez egy példa
-\end{example}
+asd
+\fi
