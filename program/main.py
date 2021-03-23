@@ -8,19 +8,25 @@ from skimage.morphology import skeletonize
 
 def TemplateMatching():
 
-    for filename in os.listdir("./program/imgs/footman"):
-        img_rgb = cv2.imread('playArea.png')
-        img_gray = cv2.cvtColor(img_rgb, cv2.COLOR_BGR2GRAY)
-        template = cv2.imread(f"./program/imgs/footman/{filename}",0)
-        w, h = template.shape[::-1]
-        for i in range(2):
-            template = cv2.flip(template,1)
-            res = cv2.matchTemplate(img_gray,template,cv2.TM_CCOEFF_NORMED)
-            threshold = 0.8
-            loc = np.where( res >= threshold)
-            for pt in zip(*loc[::-1]):
-                cv2.rectangle(img_rgb, pt, (pt[0] + w, pt[1] + h), (0,0,255), 2)
-                cv2.imwrite('res.png',img_rgb)
+    img_rgb = cv2.imread('playArea.png')
+    img_gray = cv2.cvtColor(img_rgb, cv2.COLOR_BGR2GRAY)
+
+    units = [['./program/imgs/footman',(255,0,0)],['./program/imgs/peasant',(0,100,255)],['./program/imgs/buildings',(0,255,255)]]
+
+    for unit in units:
+        for filename in os.listdir(unit[0]):
+            
+            template = cv2.imread(f"{unit[0]}/{filename}",0)
+            w, h = template.shape[::-1]
+            for i in range(2):
+                template = cv2.flip(template,1)
+                res = cv2.matchTemplate(img_gray,template,cv2.TM_CCOEFF_NORMED)
+                threshold = 0.82
+                loc = np.where( res >= threshold)
+
+                for pt in zip(*loc[::-1]):
+                    cv2.rectangle(img_rgb, pt, (pt[0] + w, pt[1] + h), unit[1], 2)
+                    cv2.imwrite('res.png',img_rgb)
 
         
 
@@ -44,7 +50,7 @@ def ReadText(name: str,cropImage: np.ndarray):
 
         skeleton = cv2.threshold(thresh,0,1,cv2.THRESH_BINARY)[1]
         skeleton = (255*skeletonize(skeleton)).astype(np.uint8)
-        kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5,6)) # can be tweaked
+        kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (4,6)) # can be tweaked
         skeleton_dilated = ~cv2.morphologyEx(skeleton, cv2.MORPH_DILATE, kernel)
 
         data = pytesseract.image_to_string(skeleton_dilated, lang='eng',config='--psm 10 -c tessedit_char_whitelist=0123456789s')
@@ -62,17 +68,21 @@ def Main():
     print("Connecting to dosbox...")
     socket = context.socket(zmq.REQ)
     socket.connect("tcp://localhost:5555")
-    
+
     while True:
 
         pytesseract.pytesseract.tesseract_cmd = r"C:\Programs\Tesseract-OCR\tesseract.exe" # Need to be dynamic
 
         image = cv2.imread('C:\\Users\\Kriszu\\Desktop\\capture\\war_000.png')
         
-        ReadText("Lumber",image[1:8,143:169])
-        ReadText("Gold",image[1:8,243:269])
-        cv2.imwrite("map.png",image[6:70,3:67]) # térkép
-        cv2.imwrite("playArea.png",image[11:189,71:313]) #játéktér
+        try:
+            ReadText("Lumber",image[1:8,143:169])
+            ReadText("Gold",image[1:8,243:269])       
+            cv2.imwrite("map.png",image[6:70,3:67]) # térkép
+            cv2.imwrite("playArea.png",image[11:189,71:313]) #játéktér
+
+        except TypeError:
+            continue
 
         socket.send(bytes("teszt",'utf-8'))
         message = socket.recv()
