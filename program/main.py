@@ -11,7 +11,7 @@ def TemplateMatching():
     img_rgb = cv2.imread('playArea.png')
     img_gray = cv2.cvtColor(img_rgb, cv2.COLOR_BGR2GRAY)
 
-    units = [['./program/imgs/footman',(255,0,0)],['./program/imgs/peasant',(0,100,255)],['./program/imgs/buildings',(0,255,255)]]
+    units = [['./program/imgs/footman',(255,0,0),0.8],['./program/imgs/peasant',(0,100,255),0.9],['./program/imgs/buildings',(0,255,255),0.8],['./program/imgs/tree',(19,69,139),0.8]]
 
     for unit in units:
         for filename in os.listdir(unit[0]):
@@ -21,7 +21,7 @@ def TemplateMatching():
             for i in range(2):
                 template = cv2.flip(template,1)
                 res = cv2.matchTemplate(img_gray,template,cv2.TM_CCOEFF_NORMED)
-                threshold = 0.82
+                threshold = unit[2]
                 loc = np.where( res >= threshold)
 
                 for pt in zip(*loc[::-1]):
@@ -89,6 +89,6 @@ def Main():
         print(f"Received reply {message}")
         TemplateMatching()
         #cv2.waitKey()
-        time.sleep(0.5)
+        time.sleep(0.1)
 
 Main()
