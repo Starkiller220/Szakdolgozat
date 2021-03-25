@@ -265,7 +265,7 @@ void RENDER_EndUpdate( bool abort ) {
 		int time;
 		std::istringstream(sstr.str()) >> time;
 
-		if (time %2 == 0 && fpsCounter >= render.src.fps)
+		if (fpsCounter >= render.src.fps)
 		{
 			LOG_MSG(sstr.str().c_str());
 			//Mouse_CursorSet(0, 0);
