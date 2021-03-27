@@ -1,30 +1,24 @@
-\Chapter{Koncepció}
+\Chapter{Hasonló alkalmazások és koncepció}
 
-\Section{A fejezet célja}
+\Section{Mesterséges intelligencia a videojátékokban}
+A mesterséges intelligencia már több mint fél évszázada foglalkoztatja az embereket, mind a tudományos fantasztikus regényekben, mind az informatikában, ambár az utóbbi az viszonylag újkeletű dolog. Az első definíció, és maga a fogalom mint mesterséges intelligencia (artificial intelligence) egy amerikai informatikustól John McCarthytól származik, 1956ból.
+%ref: https://courses.cs.washington.edu/courses/csep590/06au/projects/history-ai.pdf
 
-Ez a fejezet még nem a saját eredményekkel foglalkozik, hanem bemutatja, mi a problémakör, milyen módszerekkel, milyeneredményeket sikerült elérni eddig másoknak.
+Videojátékok terén is az 50es évekre tehető a kezdet, 1950ben mutatták be a "Bertie the Brain" nevezetű számítógépet, mely segítségével mesterséges intelligencia ellen lehetett játszani a Tic-tac-toe nevezetű játékot. Egy évre rá 1951ben kiadták a Brit Nimrod nevezetű számítógépet ahol szintén gépi ellenfél ellen lehetett megmérkőzni, de ezúttal a Nim nevű játékban.
+Ezek a számítógépek elég kezdetlegesek voltak nem is biztos hogy mára már hagyományos értelemben véve videojátéknak neveznénk őket, de kétségkívül az elsők között voltak, akik MI-t használtak ilyen célra.
+%ref: https://en.wikipedia.org/wiki/Bertie_the_Brain
+%ref: https://en.wikipedia.org/wiki/Nimrod_(computer)
 
-A hivatkozások jelentős része ehhez a fejezethez szokott kötődni.
-(Egy hivatkozás például így néz ki \cite{coombs1987markup}.)
-Itt lehet bemutatni a hasonló alkalmazásokat.
+Az első kísérletek után nem kellett sokat várni hogy az eddiginél komolyabb szoftvereket tudjanak írni, erősebb gépi ellenfelekkel, amelyek az évtized végére, és a 60as évek elejére még tovább fejlődtek. Ugyanakkor a 70es évekig kellett várni olyan nagy címekre, mint a \textit{Spacewar!} és a \textit{Pong}, majd az évtized végén megjelenő \textit{ Space Invaders (1978)} és \textit{Pacman (1980)}, melyeknél már fokozatosan erősödtek a gépi ellenfelek.
+A 80as és 90es években már szinte minden zsánerben fellelhető volt valamiféle mesterséges intelligencia, legyen szó verekedős, stratégiai, sport, vagy szerepjátékról.
 
-\Section{Tartalom és felépítés}
+Természetesen sokakban kritika is megfogalmazódott, hogy nem-e úgy vannak leprogramozva a gépi ellenfelek hogy csaljanak, és gyakran ez igaz is volt, mert egyszerűbb egy stratégiai játékban olykor olykor megadni az MI-nek a valódi játékos pozicíóját, mint leprogramozni ténylegesen hogy megtalálja. Gyakori szokás még szintén stratégiai játékokban hogy valamennyi százalék bónuszt kap egy-egy nyersanyagra az ellenfél. Habár a kritika teljesen jogos, és néhol tényleg látványos ez a csalás, manapság sokkal kifinomultabbab ezek a rendszerek, és a lehető legjobb játélélményt szolgálják, mivel szinte elengedhetetlenné vált a videojáték iparban a mesterséges intelligencia használata.
 
-A fejezet tartalma témától függően változhat. Az alábbiakat attól függően különböző arányban tartalmazhatják.
-\begin{itemize}
-\item Irodalomkutatás. Amennyiben a dolgozat egy módszer kidolgozására, kifejlesztésére irányul, akkor itt lehet részletesen végignézni (módszertani vagy időrendi bontásban), hogy az eddigiekben milyen eredmények születtek a témakörben.
-\item Technológia. Mivel jellemzően kutatásról vagy szoftverfejlesztésről van szó, ezért annak a jellemző elemeit, technikai részleteit itt kell bemutatni.
-Ez tehát egy módszeres bevezetés ahhoz, hogy ha valaki nem jártas a témakörben, akkor tudja, hogy a dolgozat milyen aktuálisan elérhető eredményeket, eszközöket használt fel.
-\item Piackutatás. Bizonyos témáknál új termék vagy szolgáltatás kifejlesztése a cél.
-Ekkor érdemes annak alaposan utánanézni, hogy aktuálisan milyen eszközök érhetők el a piacon.
-Ez szoftverek esetében a hasonló alkalmazások bemutatását, táblázatos formában történő összehasonlítását jelentheti.
-Szerepelhetnek képek és észrevételek a viszonyításként bemutatott alkalmazásokhoz.
-\item Követelmény specifikáció. Külön szakaszban érdemes részletesen kitérni az elkészítendő alkalmazással kapcsolatos követelményekre.
-Ehhez tartozhatnak forgatókönyvek (\textit{scenario}-k).
-A szemléletesség kedvéért lehet hozzájuk képernyőkép vázlatokat is készíteni, vagy a használati eseteket más módon szemléltetni.
-\end{itemize}
+Felmerül ugyanakkor a kérdés, hogy amennyiben egy videojátékba be lehet programozni egy mesterséges intelligenciát ami ellenfélnek (vagy csapattársnak) szolgál az emberi játékos számára, meg lehet-e tanítani vagy be lehet-e programozni egy másik MI-t arra hogy játszon egy játékkal? A továbbiakban ezzel a kérdskörrel fogunk foglalkozni.
+\iffalse
+\Section{Ember a gép ellen}
+aaaaa
 
-\Section{Amit csak említés szintjén érdemes szerepeltetni}
-
-Az olvasóról annyit feltételezhetünk, hogy programozásban valamilyen szinten járatos, és a matematikai alapfogalmakkal sem ebben a dolgozatban kell megismertetni.
-A speciális eszközök, programozási nyelvek, matematikai módszerekk és jelölések persze jó, hogy ha említésre kerülnek, de nem kell nagyon belemenni a közismertnek tekinthető dolgokba.
+\Section{AlphaStar}
+Talán a 
+\fi
