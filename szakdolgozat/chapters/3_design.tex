@@ -2,7 +2,7 @@
 
 \Section{Dosbox}
 
-A szoftver futtatásához elengedhetetlen egy DOS emulátor, amire a legjobb választás a nyílt forráskódú Dosbox. Az SDL multimédiás könyvtárat használja, és a lehető leghűbben lehet vele Dos-os környezetet emulálni. A nyílt forráskódnak köszönhetően betekintést lehet nyerni a működésébe, továbbá módosítani saját igényünknek megfelelően. 
+A szoftver futtatásához elengedhetetlen egy DOS emulátor, amire a legjobb választás a nyílt forráskódú Dosbox. Az SDL multimédiás könyvtárat használja, és a lehető leghűbben lehet vele Dos-os környezetet emulálni. A nyílt forráskódnak köszönhetően betekintést lehet nyerni a működésébe, továbbá módosítani saját igényünknek megfelelően. Ez egy nagyon fontos pont számunkra, ugyanis a megoldandó feladathoz igazíthatjuk.
 
 \Section{OpenCv}
 
@@ -10,7 +10,7 @@ Az OpenCv (teljes nevén Open Source Computer Vision Library) a nevéből adód�
 
 \Section{ZeroMQ}
 
-A ZeroMQ egy beágyazható hálózati könyvtár, mely úgy működik mint egy párhuzamossági keretrendszer. Olyan socketeket biztosít, amelyek atomi üzeneteket szállítanak különböző transzportokon keresztül, például folyamaton belül, folyamatok között, TCP-n és multicastban. A socketeket N-ről-N-re összekapcsolhatjuk olyan mintákkal, mint a fan-out, pub-sub, task distribution és request-reply. Elég gyors ahhoz, hogy a klaszteres termékek szöveteként szolgáljon. Aszinkron I/O modellje aszinkron üzenetfeldolgozási feladatokként felépített, skálázható többmagos alkalmazásokat biztosít. Számos nyelvi API-val rendelkezik, és a legtöbb operációs rendszeren fut. Ez hatalmas előny 2 különböző nyelven írt program összekapcsolásánál, és pont ez az ami miatt ezt a könyvtárat választottam.
+A ZeroMQ egy beágyazható hálózati könyvtár, mely úgy működik mint egy párhuzamossági keretrendszer. Olyan socketeket biztosít, amelyek atomi üzeneteket szállítanak különböző csatornákon keresztül, például folyamaton belül, folyamatok között, TCP-n és multicastban. A socketeket N-ről-N-re összekapcsolhatjuk olyan mintákkal, mint a fan-out, pub-sub, task distribution és request-reply. Aszinkron I/O modellje aszinkron üzenetfeldolgozási feladatokként felépített, skálázható többmagos alkalmazásokat biztosít. Számos nyelvi API-val rendelkezik, és a legtöbb operációs rendszeren fut. Ez hatalmas előny 2 különböző nyelven írt program összekapcsolásánál, és pont ez az ami miatt ezt a könyvtárat választottam.
 
 \Section{GIMP}
 
@@ -28,8 +28,12 @@ Maga a mesterséges intelligencia és a képfelismerő algoritmusok a DosBoxtól
 
 A Numpy az előbb említett Pythonhoz egy könyvtár amely szintúgy nyílt forráskódú (mint a legtöbb python könyvtár). Működését tekintve numerikus számításokat segíti elő, könnyen kezelhető többdimenziós tömbökkel. Szinte elengedhetetlen kelléke a pythonban történő matematikai számításoknak.
 % ref: https://numpy.org/
-\iffalse
+
 \Section{Tesseract OCR és pytesseract}
 
+A Tesseract OCR (Optical Character Recognition - Optikai Karakter Felismerés) egy Google átlal fejlesztett szövegfelismerő motor. Beépített UTF-8 támogatottsággal rendelkezik, és több 100 nyelvet ismer alapértelmezetten.
+
+A pytesseract az ezt használó python könyvtár, amely segítségével fel lehet majd ismerni a képernyőképen lévő karaktereket.
+
 % ref: https://github.com/tesseract-ocr/tesseract 
-\fi
+
