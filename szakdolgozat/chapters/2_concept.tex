@@ -27,13 +27,16 @@ Léteztek már az AlphaStar előtt is MI-k amik képesek voltak valamilyen szint
 
 Nagy probléma továbbá leküzdeni azt, hogy egyszerűbb játékokkal szemben (mint például a Tic-tac-toe vagy a kő-papír-olló) nincsen úgymond "legjobb stratégia", így rengeteg esetet kell vizsgálni és folyamatosan új módszereket keresni. Ugyanígy a már említett táblás játékokhoz való hozzáállást sem lehet alkalmazni, mert amíg a sakkban és a goban minden információ adott, egy ilyen stratégiai játékban rengeteg a rejtett, ismeretlen tényező, amelyet fel kell fedezni. Mindezt nehezíti hogy ezt valós időben, vagy legalábbis minimális késlekedéssel kell elemezni és döntést hozni, ráadásul figyelembe venni a hosszú távú tervezést is. Ugyanígy a sakkal ellentétben, ahol csak 6 féle bábú van, és egyszerre maximum 32 játszik egy adott mérkőzésen, egy videojátékban több tucat egység variáns lehet, amelyekből több száz is létezhet egyidejűleg, ezzel növelve a komplexitást.
 
-\Section{A StarCraft és a Warcraft}
+\Section{A Warcraft játékmechanikája}
+
+\subsection{A StarCraft és a Warcraft}
 Mivel mind a két játékot a Blizzard készítette, rengeteg hasonlóság fedezhető fel bennük, ha mind a kettőből az eredeti, első részt vesszük, rájövünk hogy igazából a Starcraft az csak egy továbfejlesztett Warcraft másolat, sci-fi köntösbe bújtatva, és a fajok közötti különbséget már nem csak kinézetben kereshetjük, hanem az egységek statisztikái, és a különböző fajok játékstílusa is más. Ezt a legjobban egy táblázattal lehetne szemléltetni.
 \begin{table}[h]
     \centering
     \caption{Összehasonlítás}
     \label{tab:osszehasonlitas}
-    \begin{tabular}{l|c|c|}
+    \begin{tabular}{|c|c|c|}
+    \hline
     ~ & Warcraft & Starcraft \\
     \hline
     Megjelenés & 1994 & 1998 \\
@@ -70,15 +73,37 @@ Mielőtt hozzáfognánk magához a mesterséges intelligenciához, a Warcraftot 
 \begin{itemize}
     \item Hogyan mentsük le a képet? Esetleg van rá beépített függvény?
     
-    
+    Itt elsődlegesen beépített függvény(eknek) kell utána nézni, amennyiben nincsen, vagy nem használható, eldönteni hogy fájlba írást kellene megvalósítani, vagy egészen más megoldást keresni.
     \item Milyen időközönként kellene ezt megtenni?
+    
+    Optimális időintervallumot kell találni a Képernyőkép rögzítésére, ami nem túl rövid ahhoz hogy lehetetlenség legyen az összeset feldolgozni, és rá választ kapni, ugyanakkor nem is túl hosszú, hogy darabosnak tűnjön tőle a játékmenet, és feleslegesen várakozzon bemenetre az MI.
 \end{itemize}
 
 \subsection{3. lépés: Processzek közötti kommunikáció}
 
 \begin{itemize}
     \item Hogyan fog a lementett kép bekerülni az MI-be?
+    
+    Ez a kérdés erősen függ az előző ponttól. Amennyiben a fájlba mentés megoldható, és a mentési intervallul is elfogadható, akkor csak be kell olvasnia az MI-nek a lementett fájlt. Ugyanakkor ha ez nem megoldható, más módszerek után kell nézni.  
+    
     \item Hogyan fogunk választ küldeni a DosBoxnak hogy hova kell kattintani?
+    
+    Amennyiben feldolgoztuk a képet, és megvan hova kell kattintani/mit kell megnyomni, kérdéses hogy ezt hogyan juttatjuk vissza a DosBoxba. Ez is működhete-e fájlba írással, vagy ennél elegánsabb módszert kell találni.  
+
+\end{itemize}
+
+
+\subsection{4. lépés: Adatfeldolgozás}
+
+\begin{itemize}
+    \item Hogyan ismeri fel a mesterséges intelligencia hogy mit is lát pontosan?
+    
+    Ez is megoldható többféleképpen, amennyiben rendelkezésre állnak a játékban használt spriteok, abban az esetben az úgynevezett template matching is alkalmazható. Amennyiben ez nem járható út, akkor valamiféle becslés alapján kell meghatározni az éppen látni vélt objektumot.
+    % ref: https://en.wikipedia.org/wiki/Template_matching
+
+    \item Mi alapján dönt a következő lépésről?
+    
+    Ennek a lépésnek ez a legnehezebb része. Történhet a döntéshozatal úgy, hogy kvázi előre bele van programozva egy stratégia, és azt próbálja végrehajtani, vagy öntanuló algoritmus alapján is. Az utóbbi elegánsabb, ugyanakkor kérdéses hogy elbír-e ez a módszer egy ilyen komplexitású játékot, annak ellenére hogy mai szemmel nem tekinthetjük annak. 
 \end{itemize}
 
 
