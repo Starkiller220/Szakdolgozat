@@ -43,6 +43,8 @@
 #include <thread>
 #include <zmq.hpp>
 
+#include <keyboard.h>
+
 Render_t render;
 ScalerLineHandler_t RENDER_DrawLine;
 int fpsCounter = 0;
@@ -74,6 +76,22 @@ void ZeroMQLoop()
 			Mouse_CursorSet(stof(result[1]), stof(result[2]));
 			Mouse_ButtonPressed(0);
 			Mouse_ButtonReleased(0);
+		}
+
+		else if (result[0] == "start")
+		{
+			KEYBOARD_AddKey(KBD_s, 1);
+			KEYBOARD_AddKey(KBD_s, 0);
+			Sleep(500);
+			KEYBOARD_AddKey(KBD_u, 1);
+			KEYBOARD_AddKey(KBD_u, 0);
+			Sleep(500);
+			KEYBOARD_AddKey(KBD_m, 1);
+			KEYBOARD_AddKey(KBD_m, 0);
+			Sleep(500);
+			// Click to Forest
+			KEYBOARD_AddKey(KBD_o, 1);
+			KEYBOARD_AddKey(KBD_o, 0);
 		}
 
 		//  Send reply back to client
