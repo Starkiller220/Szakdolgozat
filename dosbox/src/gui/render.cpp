@@ -43,11 +43,6 @@
 #include <thread>
 #include <zmq.hpp>
 
-enum Message{
-	MOUSE
-};
-
-
 Render_t render;
 ScalerLineHandler_t RENDER_DrawLine;
 int fpsCounter = 0;
@@ -62,13 +57,28 @@ void ZeroMQLoop()
 	while (true) {
 		zmq::message_t request;
 
-		//  Wait for request
+		//  Wait for next request from client
 		socket.recv(&request);
 		LOG_MSG(request.to_string().c_str());
 
-		//  Reply request
+		std::vector<std::string> result;
+		std::istringstream iss(request.to_string());
+		for (std::string s; iss >> s; )
+			result.push_back(s);
+
+		if (result[0] == "Mouse")
+		{
+			LOG_MSG(result[1].c_str());
+			LOG_MSG(result[2].c_str());
+			//Mouse_CursorSet(0,0);
+			Mouse_CursorSet(stof(result[1]), stof(result[2]));
+			Mouse_ButtonPressed(0);
+			Mouse_ButtonReleased(0);
+		}
+
+		//  Send reply back to client
 		zmq::message_t reply(5);
-		memcpy(reply.data(), "Message recieved!", 17);
+		memcpy(reply.data(), "World", 5);
 		
 		socket.send(reply);
 	}
