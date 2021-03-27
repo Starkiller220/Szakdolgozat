@@ -15,10 +15,40 @@ A 80as és 90es években már szinte minden zsánerben fellelhető volt valamif�
 Természetesen sokakban kritika is megfogalmazódott, hogy nem-e úgy vannak leprogramozva a gépi ellenfelek hogy csaljanak, és gyakran ez igaz is volt, mert egyszerűbb egy stratégiai játékban olykor olykor megadni az MI-nek a valódi játékos pozicíóját, mint leprogramozni ténylegesen hogy megtalálja. Gyakori szokás még szintén stratégiai játékokban hogy valamennyi százalék bónuszt kap egy-egy nyersanyagra az ellenfél. Habár a kritika teljesen jogos, és néhol tényleg látványos ez a csalás, manapság sokkal kifinomultabbab ezek a rendszerek, és a lehető legjobb játélélményt szolgálják, mivel szinte elengedhetetlenné vált a videojáték iparban a mesterséges intelligencia használata.
 
 Felmerül ugyanakkor a kérdés, hogy amennyiben egy videojátékba be lehet programozni egy mesterséges intelligenciát ami ellenfélnek (vagy csapattársnak) szolgál az emberi játékos számára, meg lehet-e tanítani vagy be lehet-e programozni egy másik MI-t arra hogy játszon egy játékkal? A továbbiakban ezzel a kérdskörrel fogunk foglalkozni.
-\iffalse
-\Section{Ember a gép ellen}
-aaaaa
 
-\Section{AlphaStar}
-Talán a 
-\fi
+\Section{Ember a gép ellen}
+%aaaaa Alphago!
+
+\subsection{AlphaStar}
+Talán a legjobb eredményt a Deepmind mesterséges intelligenciája érte el a StarCraft II nevű játékban, mely jelenleg jobb a játékosok 99,8\%-nál. 
+%ref:https://www.theverge.com/2019/10/30/20939147/deepmind-google-alphastar-starcraft-2-research-grandmaster-level
+Ez a játék talán a legkomplexebb a jelenlegi stratégiai játékok közül, nem hiába fektetnek komoly pénzeket a verseny szintű mérkőzések lebonyolítására.
+Léteztek már az AlphaStar előtt is MI-k amik képesek voltak valamilyen szinten játszani, de azok valamiféle előnyt kaptak a cél elérése érdekében, például egyszerűsített pályák, korlátozott játékmenet, emberfeletti képességek, így azok teljesítménye közel sem éri el az elvárt szintet.
+
+Nagy probléma továbbá leküzdeni azt, hogy egyszerűbb játékokkal szemben (mint például a Tic-tac-toe vagy a kő-papír-olló) nincsen úgymond "legjobb stratégia", így rengeteg esetet kell vizsgálni és folyamatosan új módszereket keresni. Ugyanígy a már említett táblás játékokhoz való hozzáállást sem lehet alkalmazni, mert amíg a sakkban és a goban minden információ adott, egy ilyen stratégiai játékban rengeteg a rejtett, ismeretlen tényező, amelyet fel kell fedezni. Mindezt nehezíti hogy ezt valós időben, vagy legalábbis minimális késlekedéssel kell elemezni és döntést hozni, ráadásul figyelembe venni a hosszú távú tervezést is. Ugyanígy a sakkal ellentétben, ahol csak 6 féle bábú van, és egyszerre maximum 32 játszik egy adott mérkőzésen, egy videojátékban több tucat egység variáns lehet, amelyekből több száz is létezhet egyidejűleg, ezzel növelve a komplexitást.
+
+\Section{A StarCraft és a Warcraft}
+Mivel mind a két játékot a Blizzard készítette, rengeteg hasonlóság fedezhető fel bennük, ha mind a kettőből az eredeti, első részt vesszük, rájövünk hogy igazából a Starcraft az csak egy továbfejlesztett Warcraft másolat, sci-fi köntösbe bújtatva, és a fajok közötti különbséget már nem csak kinézetben kereshetjük, hanem az egységek statisztikái, és a különböző fajok játékstílusa is más. Ezt a legjobban egy táblázattal lehetne szemléltetni.
+\begin{table}[h]
+    \centering
+    \caption{Összehasonlítás}
+    \label{tab:osszehasonlitas}
+    \begin{tabular}{l|c|c|}
+    ~ & Warcraft & Starcraft \\
+    \hline
+    Megjelenés & 1994 & 1998 \\
+    Játszható fajok száma & 2 & 3 \\
+    Fajonként eltrérő egység statisztika & nem & igen \\
+    Játszható pályák száma & 20 & 86 \\
+    \hline
+    \end{tabular}
+\end{table}
+
+Látható hogy már a régebbi StarCraft is hatványozottabban komplexebb volt az spirituális elődjénél, így érthető hogy az utódhoz évekbe telt olyan intelligenciát írni, ami szinte mindekit legyőz.
+
+\Section{A Terv}
+
+Mindazok után hogy megnéztük az MI kialakulását a videojátékok terén, továbbá a hasonló alkalmazások jellemzőit, eredményeit. Ideje tervet készíteni, milyen lépések szükségesek ahhoz hogy implementálni lehessen egy Warcraft-al játszó mesterséges intelligenciát.
+
+\subsection{1. lépés: Kommunikáció a DosBox-al}
+
