@@ -50,5 +50,36 @@ Látható hogy már a régebbi StarCraft is hatványozottabban komplexebb volt a
 
 Mindazok után hogy megnéztük az MI kialakulását a videojátékok terén, továbbá a hasonló alkalmazások jellemzőit, eredményeit. Ideje tervet készíteni, milyen lépések szükségesek ahhoz hogy implementálni lehessen egy Warcraft-al játszó mesterséges intelligenciát.
 
-\subsection{1. lépés: Kommunikáció a DosBox-al}
+Általánosságban elmondható, hogy az elkészítendő intelligenciát pythonban szeretnénk megvalósítani, részeredményeket és statisztikákat karakteres felületen közöljük a felhasználóval, és zavartalanul kell futnia magának a játéknak is.
+
+\subsection{1. lépés: DosBox forráskódjának megismerése}
+
+Mielőtt hozzáfognánk magához a mesterséges intelligenciához, a Warcraftot futtató emulátor forráskódjával kell megismerkedni. Fel kell tennünk magunknak néhány kérdést, amelyet majd az implementáció során igyekszünk megválaszolni, így megoldva a problémákat.
+
+\begin{itemize}
+    \item Hogyan tudjuk irányítani a billentyűzetet és az egeret?
+    
+    Eléggé evidens ennek a kérdésnek a létjogosultsága, valamilyen úton-módon hozzá kell férnünk a kurzor pozíciójához és a billentyűzethez és mindezt magában a kódban irányítani.  
+    \item Melyik kódrész az ahová beilleszthetjük a saját kódrészünket?
+    
+    Ezt talán az egyik legnehezebb megtalálni, mivel elég terjedelmes programról van szó, és csak úgy akárhova nem előnyös beilleszteni kódot, mert nem tudhatjuk milyen hatást fejtünk ki az emulátorra. A meghatározáshoz gondos előkészületek kellenek, és a lehető legkevesbé kell lassítani a programot.
+\end{itemize}
+
+\subsection{2. lépés: Képernyőkép mentése}
+
+\begin{itemize}
+    \item Hogyan mentsük le a képet? Esetleg van rá beépített függvény?
+    
+    
+    \item Milyen időközönként kellene ezt megtenni?
+\end{itemize}
+
+\subsection{3. lépés: Processzek közötti kommunikáció}
+
+\begin{itemize}
+    \item Hogyan fog a lementett kép bekerülni az MI-be?
+    \item Hogyan fogunk választ küldeni a DosBoxnak hogy hova kell kattintani?
+\end{itemize}
+
+
 
