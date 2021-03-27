@@ -24,10 +24,11 @@ class WarcraftAI:
         img_gray = cv2.cvtColor(playArea, cv2.COLOR_BGR2GRAY)
 
         units = [
-                ['./program/imgs/footman',(255,0,0),0.8],
-                ['./program/imgs/peasant',(0,100,255),0.9],
-                ['./program/imgs/buildings',(0,255,255),0.6],
-                ['./program/imgs/tree',(19,69,139),0.8]]
+                ['./program/imgs/footman',(255,0,0),0.82,1],
+                ['./program/imgs/peasant',(0,100,255),0.9,2],
+                ['./program/imgs/buildings',(0,255,255),0.76,3],
+                ['./program/imgs/tree',(19,69,139),0.8,4]
+                ]
 
         for unit in units:
             for filename in os.listdir(unit[0]):
@@ -46,7 +47,6 @@ class WarcraftAI:
                         if self.offset != None:
                             #print(self.offset[0]+math.ceil(pt[1] / 16))
                             self.map[self.offset[0]+math.ceil(pt[1] / 16)][self.offset[1]+math.ceil(pt[0] / 16)] = 2
-                            print(self.map)
                         cv2.rectangle(playArea, pt, (pt[0] + w, pt[1] + h), unit[1], 2)
                         cv2.imwrite('res.png',playArea)
 
@@ -113,8 +113,8 @@ class WarcraftAI:
 
             self.UpdateMap(image[6:70,3:67])
             self.TemplateMatching(image[12:188,72:312])
-            
-            self.socket.send(bytes("teszt",'utf-8'))
+
+            self.socket.send(bytes("Mouse 230 100",'utf-8'))
             message = self.socket.recv()
             print(f"Received reply {message}")
             
