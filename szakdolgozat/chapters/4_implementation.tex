@@ -2,4 +2,52 @@
 
 Itt történik az elkészült szoftver megvalósításának bemutatása, az előző fejezetben leírt terv szempontjai alapján.
 
-\Section{A DosBox}
+\Section{DosBox}
+
+\subsection{Buildelés}
+Első lépésként a forráskódot kell beszerezni, ez a beszerzés időpontjában elérhető legfrissebb verzióban történt meg, a további frissítése új verziókra csak abban az esetben indokolt ha kritikus hibát találok a fejlesztés során, egyébként csak komplikációk adódnának miatta.
+% ref: https://sourceforge.net/p/dosbox/code-0/4392/tree/dosbox/
+
+A következő lépés a beszerzett forráskód buildelése. Mivel jelenleg a Windowst használom gyakrabban, így a DosBox buildelése, és a mesterséges intelligencia is Windows alatt fog készülni. Nem lehetetlen hogy Linux alatt is elindulni mind a Dosbox, mind az MI, de a szakdolgazat nem foglalkozik erre az operációs rendszerre történő optimalizálásra.
+% ref: https://www.dosbox.com/wiki/Building_DOSBox_with_Visual_Studio
+
+Ha megpróbálnánk így lefordítani, azonnal hibába ütköznénk, ugyanis szükségesek hozzá különböző könyvtárak.
+
+\begin{itemize}
+
+    \item SDL (Simple DirectMedia Layer)
+    
+    Az egyetlen kötelező könyvtár és talán legfontosabb. Az SDL egy több platformos fejlesztői könyvtár, amelyet arra találtak ki, hogy alacsony szintő hozzáférést biztosítson többek között az egérhez, billentyűzethez, különböző játékvezérlőkhöz, magához a hanghoz OpenGL és Direct3D segítségével. Rengeteg híres videojáték használja ezt a technológiát. Sajnos a DosBox elég válogatós, így a leírás alapján nem a legfirsebb verziót kéri, hanem egy jóval régebbi kiadást.
+    \item zlib / libpng (opcionális)
+    
+    Egy opcionális könyvtár képek és videók mentésére. A tervben vázoltak alapján arra következtetünk, hogy ez még a hasznunkra vállhat, így mind a két könyvtárat is le kell töltenünk, mivel a \textit{libpng} követelménye a \textit{zlib}. 
+    \item SDL\_net (opcionális)
+    
+    Lehetővé teszi a hálózat használatát. A többjátékos mód eléréséhez elengedhetetlen, ugyanakkor nincs tervben ennek a használata. Amennyiben ez módosul, ezt is hozzáadjuk a könyvtárakhoz.
+    \item SDL\_sound (opcionális)
+    
+    Lejátszhatóak lesznek a tömörített hanggal rendelkező CD-k.
+    \item PDCurses (opcionális)
+    
+    Elérhetővé teszi a DOS Debuggert.
+
+\end{itemize}
+
+Miután eldöntöttük mely könyvtárak szükségesek nekünk a fordításhoz, a fordítási útmutató alapján beállítjuk a linkereket megfelelően, és a szükséges DLL fájlokat is. 
+
+Utolsó dolgunk átírni a \textit{config.h} nevű fájlban az alábbi konfigurációkat: 
+
+\begin{cpp}
+
+    ...
+    #define C_DEBUG 0 // PDCurses
+
+    #define C_SSHOT 1 // libpng
+
+    #define C_SRECORD 1 // zlib
+
+    #define C_MODEM 0 // SDL\_net 
+
+    #define C_IPX 0 // SDL\_net 
+    ...
+\end{cpp}
