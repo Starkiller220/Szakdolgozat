@@ -46,8 +46,138 @@ Utolsó dolgunk átírni a \textit{config.h} nevű fájlban az alábbi konfigur�
 
     #define C_SRECORD 1 // zlib
 
-    #define C_MODEM 0 // SDL\_net 
+    #define C_MODEM 0 // SDL_net 
 
-    #define C_IPX 0 // SDL\_net 
+    #define C_IPX 0 // SDL_net 
     ...
 \end{cpp}
+
+\subsection{DosBox átalakítása}
+
+Ahhoz hogy a tervben leírtakat meg tudjuk valósítani, meg kell találnuk a számunkra fontos kódrészeket. Ezek sorrendtől függetlenül a következők:
+
+\begin{itemize}
+    \item Egér 
+    \item Billentyűzet
+    \item Képernyőkép
+\end{itemize}
+
+A fájlok közül rákereshetünk hogy tartalmazza-e valamelyik a keyboard vagy mouse kulcsszavatak. Ezekre rákeresve találunk 2 fájlt ami számunkra érdekes lehet. Az egyik a \textit{keyboard.h} a másik a \textit{mouse.h}.
+
+Így néz ki például a \textit{keyboard.h} header fájl:
+
+\begin{cpp}
+    #ifndef DOSBOX_KEYBOARD_H
+    #define DOSBOX_KEYBOARD_H
+    
+    enum KBD_KEYS {
+        KBD_NONE,
+        KBD_1,	KBD_2,	KBD_3,	KBD_4,	KBD_5,	KBD_6,	KBD_7,	
+        KBD_8,	KBD_9,	KBD_0,		
+        KBD_q,	KBD_w,	KBD_e,	KBD_r,	KBD_t,	KBD_y,	KBD_u,	
+        KBD_i,	KBD_o,	KBD_p,	
+        KBD_a,	KBD_s,	KBD_d,	KBD_f,	KBD_g,	KBD_h,	KBD_j,	
+        KBD_k,	KBD_l,	KBD_z,
+        KBD_x,	KBD_c,	KBD_v,	KBD_b,	KBD_n,	KBD_m,	
+        KBD_f1,	KBD_f2,	KBD_f3,	KBD_f4,	KBD_f5,	KBD_f6,	KBD_f7,	
+        KBD_f8,	KBD_f9,	KBD_f10,KBD_f11,KBD_f12,
+
+        ...
+        
+    };
+    
+    void KEYBOARD_ClrBuffer(void);
+    void KEYBOARD_AddKey(KBD_KEYS keytype,bool pressed);
+    
+    #endif
+\end{cpp}
+
+Látható hogy a különböző billentyűk egy enumban vannak tárolva, általános alakját tekintve \textit{KBD\_KEY}.
+Továbbá a fájl végén található egy függvény fejléce:
+
+\begin{cpp}
+    void KEYBOARD_AddKey(KBD_KEYS keytype,bool pressed);
+\end{cpp}
+
+Itt látható hogy ez a függvény paraméterbe kér egy billentyűt, a fentebb látott enumból, majd egy igaz/hamis értéket, hogy le van-e nyomva avagy sem. Ebből tisztán látszik, hogy amennyiben meghívjuk ezt a függvényt egy gombra igaz paraméterre, majd közvetenül utána hamissal, gomblenyomást tudunk szimulálni kódon belül. 
+
+Ezzel a billentyűzethez hozzá tudunk férni igen egyszerűen, következhet is az egér, amelyet a \textit{mouse.h} header fájlban találunk.
+
+\begin{cpp}
+
+    #ifndef DOSBOX_MOUSE_H
+    #define DOSBOX_MOUSE_H
+    
+    
+    void Mouse_ShowCursor(void);
+    void Mouse_HideCursor(void);
+    
+    bool Mouse_SetPS2State(bool use);
+    
+    void Mouse_ChangePS2Callback(Bit16u pseg, Bit16u pofs);
+    
+    void Mouse_CursorMoved(float xrel,float yrel,
+                           float x,float y,bool emulate);
+
+    void Mouse_CursorSet(float x,float y);
+    void Mouse_ButtonPressed(Bit8u button);
+    void Mouse_ButtonReleased(Bit8u button);
+    
+    void Mouse_AutoLock(bool enable);
+    void Mouse_BeforeNewVideoMode(bool setmode);
+    void Mouse_AfterNewVideoMode(bool setmode);
+    
+    #endif
+
+\end{cpp}
+
+Itt már nehezebb dolgunk van mint a billentyűzetnél. Vannak ugyan egyszerűbb fügvények is, mint például a \verb|Mouse_ShowCursor(void)| és a \verb|Mouse_ShowCursor(void)| amelyekkel el lehet tűntetni, majd ismét meglejeníteni a kurzort,
+És a\\ \verb|Mouse_CursorSet(float x,float y)| működése is evidens, a képernyő 2 koordinátáját kell megadni és a kurzort oda rakja.
+
+Ennél bonyolultabb függvény a \verb|Mouse_ButtonPressed(Bit8u button)| és a hozzá tartozó \verb|Mouse_ButtonReleased(Bit8u button)|. A használatát tekintve első ránézésre hasonlónak tűnik mint a billentyűzetnél lévő függvény. Ugyanakkor mivel a \textit{Bit8u} nem egy alapértelmezett típus, érdemes betekinteni a függvény definíciójába, hogy pontosan megértsük mit is vár el paraméternek.
+
+Vegyük például a gomb lenyomásához tartozó függvényt:
+\begin{cpp}
+
+    void Mouse_ButtonPressed(Bit8u button) {
+            switch (button) {
+        #if (MOUSE_BUTTONS >= 1)
+            case 0:
+                if (mouse.buttons&1) return;
+                mouse.buttons|=1;
+                Mouse_AddEvent(MOUSE_LEFT_PRESSED);
+                break;
+        #endif
+        #if (MOUSE_BUTTONS >= 2)
+            case 1:
+                if (mouse.buttons&2) return;
+                mouse.buttons|=2;
+                Mouse_AddEvent(MOUSE_RIGHT_PRESSED);
+                break;
+        #endif
+        #if (MOUSE_BUTTONS >= 3)
+            case 2:
+                if (mouse.buttons&4) return;
+                mouse.buttons|=4;
+                Mouse_AddEvent(MOUSE_MIDDLE_PRESSED);
+                break;
+        #endif
+            default:
+                return;
+            }
+        mouse.times_pressed[button]++;
+        mouse.last_pressed_x[button]=POS_X;
+        mouse.last_pressed_y[button]=POS_Y;
+    }
+
+\end{cpp}
+
+Látható hogy annak fügvényében hogy mennyi gomb található az egéren (alapértelmezetten 3), az alapján engedélyez különböző eseteket a program. Alapértelmezett esetben az alábbiakra tudunk következtetni:
+
+\begin{itemize}
+    \item Ha a \textit{button} paraméter értéke 0, az a bal egérgombnak felel meg
+    \item Amennyiben az értéke 1, akkor az a jobb egérgomb
+    \item Amennyiben az érték 2, akkor az a görgő lenyomása
+\end{itemize}
+
+Ezt kombinálva a gomb eleresztésével láthatóvá válik, hogy ugyan úgy képesek vagyunk kattintani 2 függvény meghívásával, mint ahogyan ezt a billentyűzetnél tettük. 
