@@ -52,7 +52,7 @@ Utolsó dolgunk átírni a \textit{config.h} nevű fájlban az alábbi konfigur�
     ...
 \end{cpp}
 
-\subsection{DosBox átalakítása}
+\subsection{DosBox átalakítása - bemenetek}
 
 Ahhoz hogy a tervben leírtakat meg tudjuk valósítani, meg kell találnuk a számunkra fontos kódrészeket. Ezek sorrendtől függetlenül a következők:
 
@@ -180,4 +180,168 @@ Látható hogy annak fügvényében hogy mennyi gomb található az egéren (ala
     \item Amennyiben az érték 2, akkor az a görgő lenyomása
 \end{itemize}
 
-Ezt kombinálva a gomb eleresztésével láthatóvá válik, hogy ugyan úgy képesek vagyunk kattintani 2 függvény meghívásával, mint ahogyan ezt a billentyűzetnél tettük. 
+Ezt kombinálva a gomb eleresztésével láthatóvá válik, hogy ugyan úgy képesek vagyunk kattintani 2 függvény meghívásával, mint ahogyan ezt a billentyűzetnél tettük.
+
+\subsection{Dosbox átalakítása - képernyőkép}
+
+További fontos, ugyanakkor nehezebb probléma a képernyő képének lementése. Első lépésként meg kell találni a az ehhez szükséges függvényt vagy függvényeket. 
+A \textit{screenshot} szóra rákeresve a fájlok között a \textit{hardware.cpp}-ben találunk egy\\ \verb|CAPTURE_ScreenShotEvent| nevű függvényt, ugyanakkor ez nem paraméterezhető megfeleően, csak egy igaz/hamis értéket lehet megadni benne. 
+Tovább böngészve ugyan ebben a fájlban megtalálhatjuk a \verb|CAPTURE_AddImage| függvényt, mely számos paraméterrel rendelkezik, a függvény definíciójában pedig megtalálható a menteni kívánt fájl kiterjesztése is.
+
+Ezek után olyan részt kell találni a kódban, ahol periodikusan lehet futtatni az általunk megírt logika alapján a kép lementését anélkül, hogy lassítanánk a szoftver futását. Erre hosszadalmas keresés után a \textit{render.cpp} \verb|RENDER_EndUpdate| függvénye tűnik alkalmasnak, mivel ez a függvény minden frame végén lefut. 
+A függvény végét az alábbi kóddal bővítettem ki:
+\begin{cpp}
+
+    if(1)
+    {
+        ...
+
+        if (fpsCounter >= render.src.fps)
+        {
+            CAPTURE_AddImage(render.src.width==0?640:render.src.width, 
+                             render.src.height==0?400:render.src.height, 
+                             render.src.bpp, pitch,
+                             flags, fps, (Bit8u*)&scalerSourceCache, 
+                             (Bit8u*)&render.pal.rgb);
+            CaptureState = 0;
+            fpsCounter = 0;
+        }
+    
+        else
+        {
+            fpsCounter++;
+        } 
+    }
+
+    
+
+\end{cpp}
+Ennek a lényege, hogy létrehozunk egy belső FPS számlálót, és minden frameben összehasonlítjuk az elvárt FPS-el, amennyiben ezt elértük vagy túlhaladtunk rajta, lementjük a képernyő jelenlegi tartalmát.
+Ezzel technikailag másodpercenként lehet képernyőképet csinálni. Ezzel a módszerrel ez a lehető legrövidebb intervallum.
+\subsection{Dosbox átalakítása - ZeroMQ}
+
+Miután elkészült a képernyőkép bizonyos időközönkénti mentése, egy újabb nehezebb feladat következik. Implementálnunk kell a tervben leírt processzek közötti kommunikációt. 
+Erre a már szintén említett \textit{ZeroMQ} lesz a segítségünkre, amit először tesztelnünk kell C++ban és Pythonban egyaránt.
+
+Mielőtt konkrétan beágyaznánk bármiféle kódot a DosBoxba, nézzük meg hogyan is működik egy egszerű \textit{request-reply} alapján.
+
+\begin{python}
+
+    import zmq
+    import time
+
+    context = zmq.Context()
+
+    #  create socket
+    print("Connecting to server...")
+    socket = context.socket(zmq.REQ)
+    socket.connect("tcp://localhost:5555")
+
+    #  Do 10 request and wait for reply
+    for request in range(10):
+        print("Sending request %s ..." % request)
+        msg = input("message: ")
+        socket.send(bytes(msg))
+
+        
+        #  Get the reply.
+        message = socket.recv()
+        print("Received reply %s [ %s ]" % (request, message))
+\end{python}
+
+Itt az látható, hogy létrehozunk egy kontextust, majd ebből egy socketet melynek a \textit{request} típust adjuk. 
+Utána megadjuk a kapcsolat típusát, címét és a portot. Ebben a mintában 10 üzenetet tudunk küldeni, amit byte sorozatként küldi el, és minden üzenet után megvárjuk a választ. Ez lényegében a kliensünk, a következő, már C++ban írt kód pedig a szerver lesz, ami fogadja az üzeneteket és választ ad rájuk.
+
+\begin{cpp}
+    #include <zmq.hpp>
+    #include <string>
+    #include <iostream>
+    #include <windows.h>
+    int main()
+    {
+        zmq::context_t context(1);
+        zmq::socket_t socket(context, ZMQ_REP);
+        socket.bind("tcp://*:5555");
+    
+        while (true) {
+            zmq::message_t request;
+    
+            //  Wait for request
+            socket.recv(&request);
+            std::cout << "Received " << request.to_string() << std::endl;
+    
+            //  Do some 'work'
+            Sleep(1);
+    
+            //  Send reply 
+            zmq::message_t reply(5);
+            memcpy(reply.data(), "Hello", 5);
+            socket.send(reply);
+        }
+        return 0;
+    }
+\end{cpp}
+
+Felépítést tekintve nagyon hasonló a az előző kódhoz, de mivel szerverként funkcionál, így üzenetre vár, majd aztán küld egy válasz üzenetet. 
+
+Értelem szerűen ezt a kódrészt kell a DosBoxba integrálni míg az előzőt a mesterséges intelligenciába kell beágyazni. Először megkeressük azt a kódrészt ahová ezt, vagy ennek egy módosított változatát be tudjuk integrálni. Jó gondolat a jól megszokott \textit{render.cpp}-be történő bővítés, ugyanis folyamatosan figyelni kell az üzenetet és reagálni rá. Viszont ezt kipróbálva abba a problémába ütközünk, hogy a program addig "lefagy" amíg nem kap üzenetet. Ez ividens, ugyanis a \verb|socket.recv(&request)| sor lényege, hogy addig vár, amíg nem kap üzenetet. Ezt egy végtelen ciklusba rakva láthatóvá válik mi is a gond.
+
+Ennek kiküszöbölése érdekében egy külön függvényben kell definiálni a szerver kódját, majd egy új szálat indítani, és ennek párhuzamosan kell futnia a program többi részével. Így nem fagy le a programunk, és a fentebb leírt periféria manipuláló függvényeket is meg tudjuk hívni.
+\pagebreak
+\begin{cpp}
+
+    void ZeroMQLoop()
+    {
+    
+        zmq::context_t context(1);
+        zmq::socket_t socket(context, ZMQ_REP);
+        socket.bind("tcp://*:5555");
+    
+        while (true) {
+            zmq::message_t request;
+    
+            //  Wait for next request from client
+            socket.recv(&request);
+            LOG_MSG(request.to_string().c_str());
+    
+            std::vector<std::string> result;
+            std::istringstream iss(request.to_string());
+            for (std::string s; iss >> s; )
+                result.push_back(s);
+    
+            if (result[0] == "Mouse")
+            {
+                LOG_MSG(result[1].c_str());
+                LOG_MSG(result[2].c_str());
+                //Mouse_CursorSet(0,0);
+                Mouse_CursorSet(stof(result[1]), stof(result[2]));
+                Mouse_ButtonPressed(0);
+                Mouse_ButtonReleased(0);
+            }
+    
+            else if (result[0] == "start")
+            {
+                KEYBOARD_AddKey(KBD_s, 1);
+                KEYBOARD_AddKey(KBD_s, 0);
+                Sleep(500);
+                KEYBOARD_AddKey(KBD_u, 1);
+                KEYBOARD_AddKey(KBD_u, 0);
+                Sleep(500);
+                KEYBOARD_AddKey(KBD_m, 1);
+                KEYBOARD_AddKey(KBD_m, 0);
+                Sleep(500);
+                // Click to Forest
+                KEYBOARD_AddKey(KBD_o, 1);
+                KEYBOARD_AddKey(KBD_o, 0);
+            }
+    
+            //  Send reply
+            zmq::message_t reply(5);
+            memcpy(reply.data(), "Done", 4);
+            
+            socket.send(reply);
+        }
+    }
+
+    
+\end{cpp}
