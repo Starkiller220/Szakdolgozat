@@ -521,6 +521,25 @@ void Mouse_CursorSet(float x,float y) {
 	DrawCursor();
 }
 
+void Mouse_Click(float x, float y) {
+	mouse.x = x;
+	mouse.y = y;
+	DrawCursor();
+
+
+	Mouse_AddEvent(MOUSE_LEFT_PRESSED);
+	Mouse_AddEvent(MOUSE_LEFT_RELEASED);
+
+	mouse.x = x;
+	mouse.y = y;
+	DrawCursor();
+
+
+	Mouse_AddEvent(MOUSE_LEFT_PRESSED);
+	Mouse_AddEvent(MOUSE_LEFT_RELEASED);
+	
+}
+
 void Mouse_ButtonPressed(Bit8u button) {
 	switch (button) {
 #if (MOUSE_BUTTONS >= 1)
