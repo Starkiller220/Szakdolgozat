@@ -68,14 +68,54 @@ void ZeroMQLoop()
 		for (std::string s; iss >> s; )
 			result.push_back(s);
 
-		if (result[0] == "Mouse")
+		if (result[0] == "Click")
 		{
-			LOG_MSG(result[1].c_str());
-			LOG_MSG(result[2].c_str());
-			//Mouse_CursorSet(0,0);
+			LOG_MSG(std::to_string(stof(result[1])).c_str());
+			LOG_MSG(std::to_string(stof(result[2])).c_str());
+			Mouse_CursorSet(stof(result[1]), stof(result[2]));
+			LOG_MSG("MOVE CURSOR");
+			Mouse_ButtonPressed(0);
+			LOG_MSG("LEFT CLICK");
+			Mouse_ButtonReleased(0);
+			LOG_MSG("RELEASE LEFT CLICK");
+		}
+
+		else if (result[0] == "Move")
+		{
 			Mouse_CursorSet(stof(result[1]), stof(result[2]));
 			Mouse_ButtonPressed(0);
 			Mouse_ButtonReleased(0);
+			KEYBOARD_AddKey(KBD_m, 1);
+			Mouse_CursorSet(stof(result[3]), stof(result[4]));
+			Mouse_ButtonPressed(0);
+			Mouse_ButtonReleased(0);
+			KEYBOARD_AddKey(KBD_m, 0);
+		}
+
+		else if (result[0] == "Gather")
+		{
+			LOG_MSG(result[1].c_str());
+			LOG_MSG(result[2].c_str());
+			Mouse_Click(stof(result[1]), stof(result[2]));
+			Sleep(100);
+			Mouse_Click(100,150);
+			Sleep(100);
+			Mouse_Click(stof(result[3]), stof(result[4]));
+			
+		}
+
+		else if (result[0] == "Attack")
+		{
+			LOG_MSG(result[1].c_str());
+			LOG_MSG(result[2].c_str());
+			Mouse_CursorSet(stof(result[1]), stof(result[2]));
+			Mouse_ButtonPressed(0);
+			Mouse_ButtonReleased(0);
+			KEYBOARD_AddKey(KBD_a, 1);
+			Mouse_CursorSet(stof(result[3]), stof(result[4]));
+			Mouse_ButtonPressed(0);
+			Mouse_ButtonReleased(0);
+			KEYBOARD_AddKey(KBD_a, 0);
 		}
 
 		else if (result[0] == "start")
