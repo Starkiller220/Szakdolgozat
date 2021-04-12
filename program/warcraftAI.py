@@ -8,8 +8,9 @@ class WarcraftAI:
     def __init__(self):
         self.lumber = 0
         self.gold = 0
-        self.map = np.zeros(shape=(64,64))
+        self.map = [np.zeros(shape=(64,64)),np.zeros(shape=(64,64))]
         self.offset = None
+        self.commands = []
 
         self.context = zmq.Context()
         print("Connecting to dosbox...")
@@ -20,14 +21,14 @@ class WarcraftAI:
 
 
     def TemplateMatching(self,playArea):
-
+        self.map = [np.zeros(shape=(64,64)),np.zeros(shape=(64,64))]
         img_gray = cv2.cvtColor(playArea, cv2.COLOR_BGR2GRAY)
 
         units = [
-                ['./program/imgs/footman',(255,0,0),0.82,1],
-                ['./program/imgs/peasant',(0,100,255),0.9,2],
-                ['./program/imgs/buildings',(0,255,255),0.76,3],
-                ['./program/imgs/tree',(19,69,139),0.8,4]
+                ['./imgs/footman',(255,0,0),0.82,1],
+                ['./imgs/peasant',(0,100,255),0.9,2],
+                ['./imgs/buildings',(0,255,255),0.76,3],
+                ['./imgs/tree',(19,69,139),0.8,4]
                 ]
 
         for unit in units:
@@ -46,9 +47,11 @@ class WarcraftAI:
                         #print(f"{math.ceil(pt[1] / 16)},{math.ceil(pt[0] / 16)}")
                         if self.offset != None:
                             #print(self.offset[0]+math.ceil(pt[1] / 16))
-                            self.map[self.offset[0]+math.ceil(pt[1] / 16)][self.offset[1]+math.ceil(pt[0] / 16)] = 2
+                            self.map[0][self.offset[0]+math.ceil(pt[1] / 16)][self.offset[1]+math.ceil(pt[0] / 16)] = unit[3]
+                            
                         cv2.rectangle(playArea, pt, (pt[0] + w, pt[1] + h), unit[1], 2)
                         cv2.imwrite('res.png',playArea)
+                    
 
         
 
@@ -94,8 +97,41 @@ class WarcraftAI:
         self.offset = self.GetOffset(cropMap)
         print(self.offset)
         
+    def GatherPhase(self):
+        peasants = []
+        trees = []
+        mines = []
+
+        for i in range(64):
+            for j in range(64):
+                if(self.map[0][i][j] == 2):
+                    peasants.append([i,j])
+                elif(self.map[0][i][j] == 4):
+                    trees.append([i,j])
+
+        print(len(peasants))
+        for peasant in peasants:
+            
+            if(len(trees) > 0):
+                self.commands.append(f"Gather {self.GetClickCoord(peasant[0]-self.offset[0]-1,peasant[1]-self.offset[1]-1)} { self.GetClickCoord(trees[0][0]-self.offset[0],trees[0][1]-self.offset[1]) }")
+
+
+    def ExplorePhase(self):
+        pass
+
+    def BuildPhase(self):
+        pass
+
+    def CombatPhase(self):
+        pass
+
+    def GetClickCoord(self,x,y):
+        return f"{160+y*32} {20+x*16}"
 
     def MainLoop(self):
+
+        i = False
+
         while True:
         
             pytesseract.pytesseract.tesseract_cmd = r"C:\Programs\Tesseract-OCR\tesseract.exe" # Need to be dynamic
@@ -113,8 +149,14 @@ class WarcraftAI:
 
             self.UpdateMap(image[6:70,3:67])
             self.TemplateMatching(image[12:188,72:312])
+            self.GatherPhase()
+            
+            if(len(self.commands) != 0):
+                self.socket.send(bytes(self.commands[0],'utf-8'))
+                self.commands.remove(self.commands[0])
+            else:
+                self.socket.send(bytes(f"Skip",'utf-8'))
 
-            self.socket.send(bytes("Mouse 230 100",'utf-8'))
             message = self.socket.recv()
             print(f"Received reply {message}")
             
