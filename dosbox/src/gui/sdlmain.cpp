@@ -1569,6 +1569,7 @@ static void OutputString(Bitu x,Bitu y,const char * text,Bit32u color,Bit32u col
 }
 
 #include "dosbox_splash.h"
+#include <hardware.h>
 
 //extern void UI_Run(bool);
 void Restart(bool pressed);
@@ -2460,7 +2461,6 @@ int main(int argc, char* argv[]) {
 		/* Init the configuration system and add default values */
 		Config_Add_SDL();
 		DOSBOX_Init();
-
 		std::string editor;
 		if(control->cmdline->FindString("-editconf",editor,false)) launcheditor();
 		if(control->cmdline->FindString("-opencaptures",editor,true)) launchcaptures(editor);

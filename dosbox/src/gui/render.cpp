@@ -49,6 +49,7 @@ Render_t render;
 ScalerLineHandler_t RENDER_DrawLine;
 int fpsCounter = 0;
 
+
 void ZeroMQLoop()
 {
 
@@ -118,7 +119,7 @@ void ZeroMQLoop()
 			KEYBOARD_AddKey(KBD_a, 0);
 		}
 
-		else if (result[0] == "start")
+		/*else if (result[0] == "start")
 		{
 			KEYBOARD_AddKey(KBD_s, 1);
 			KEYBOARD_AddKey(KBD_s, 0);
@@ -132,7 +133,7 @@ void ZeroMQLoop()
 			// Click to Forest
 			KEYBOARD_AddKey(KBD_o, 1);
 			KEYBOARD_AddKey(KBD_o, 0);
-		}
+		}*/
 
 		//  Send reply back to client
 		zmq::message_t reply(5);
