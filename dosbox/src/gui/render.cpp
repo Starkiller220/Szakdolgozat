@@ -52,7 +52,6 @@ int fpsCounter = 0;
 
 void ZeroMQLoop()
 {
-
 	zmq::context_t context(1);
 	zmq::socket_t socket(context, ZMQ_REP);
 	socket.bind("tcp://*:5555");
@@ -71,8 +70,6 @@ void ZeroMQLoop()
 
 		if (result[0] == "Click")
 		{
-			LOG_MSG(std::to_string(stof(result[1])).c_str());
-			LOG_MSG(std::to_string(stof(result[2])).c_str());
 			Mouse_Click(stof(result[1]), stof(result[2]));
 		}
 
@@ -83,6 +80,16 @@ void ZeroMQLoop()
 			Mouse_Click(50, 130);
 			Sleep(100);
 			Mouse_Click(stof(result[3]), stof(result[4]));
+			Sleep(100);
+			Mouse_Click(70, 80);
+			Sleep(100);
+			KEYBOARD_AddKey(KBD_leftctrl, 1);	
+			Mouse_Click(stof(result[1]), stof(result[2]));
+			Sleep(100);
+			Mouse_Click(stof(result[1]), stof(result[2]));
+			Mouse_Click(stof(result[1]), stof(result[2]));
+			Sleep(250);
+			KEYBOARD_AddKey(KBD_leftctrl, 0);
 
 		}
 
@@ -95,6 +102,9 @@ void ZeroMQLoop()
 			Mouse_Click(100,150);
 			Sleep(100);
 			Mouse_Click(stof(result[3]), stof(result[4]));
+			Sleep(100);
+			Mouse_Click(70, 80);
+
 			
 		}
 
@@ -109,20 +119,33 @@ void ZeroMQLoop()
 			Mouse_Click(stof(result[3]), stof(result[4]));
 		}
 
-		else if (result[0] == "start")
+		else if (result[0] == "Start")
 		{
 			KEYBOARD_AddKey(KBD_s, 1);
 			KEYBOARD_AddKey(KBD_s, 0);
-			Sleep(500);
+			Sleep(200);
+			KEYBOARD_AddKey(KBD_s, 1);
+			KEYBOARD_AddKey(KBD_s, 0);
+			Sleep(200);
 			KEYBOARD_AddKey(KBD_u, 1);
 			KEYBOARD_AddKey(KBD_u, 0);
-			Sleep(500);
+			Sleep(200);
 			KEYBOARD_AddKey(KBD_m, 1);
 			KEYBOARD_AddKey(KBD_m, 0);
-			Sleep(500);
+			Sleep(200);
 			// Click to Forest
-			KEYBOARD_AddKey(KBD_o, 1);
-			KEYBOARD_AddKey(KBD_o, 0);
+			KEYBOARD_AddKey(KBD_down, 1);
+			KEYBOARD_AddKey(KBD_down, 0);
+			Sleep(200);
+			KEYBOARD_AddKey(KBD_down, 1);
+			KEYBOARD_AddKey(KBD_down, 0);
+			Sleep(200);
+			KEYBOARD_AddKey(KBD_enter, 1);
+			KEYBOARD_AddKey(KBD_enter, 0);
+			Sleep(200);
+			KEYBOARD_AddKey(KBD_enter, 1);
+			KEYBOARD_AddKey(KBD_enter, 0);
+			Sleep(200);
 		}
 
 		//  Send reply back to client

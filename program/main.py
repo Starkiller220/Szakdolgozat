@@ -1,6 +1,7 @@
 from warcraftAI import WarcraftAI
 
 def Main():
-    WarcraftAI()
+    AI = WarcraftAI()
+    AI.Start()
 
 Main()

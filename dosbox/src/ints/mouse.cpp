@@ -526,15 +526,8 @@ void Mouse_Click(float x, float y) {
 	mouse.y = y;
 	DrawCursor();
 
-
-	Mouse_AddEvent(MOUSE_LEFT_PRESSED);
+	Sleep(100);
 	Mouse_AddEvent(MOUSE_LEFT_RELEASED);
-
-	mouse.x = x;
-	mouse.y = y;
-	DrawCursor();
-
-
 	Mouse_AddEvent(MOUSE_LEFT_PRESSED);
 	Mouse_AddEvent(MOUSE_LEFT_RELEASED);
 	
