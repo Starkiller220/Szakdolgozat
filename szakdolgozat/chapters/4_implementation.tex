@@ -287,61 +287,61 @@ Felépítést tekintve nagyon hasonló a az előző kódhoz, de mivel szerverké
 Értelem szerűen ezt a kódrészt kell a DosBoxba integrálni míg az előzőt a mesterséges intelligenciába kell beágyazni. Először megkeressük azt a kódrészt ahová ezt, vagy ennek egy módosított változatát be tudjuk integrálni. Jó gondolat a jól megszokott \textit{render.cpp}-be történő bővítés, ugyanis folyamatosan figyelni kell az üzenetet és reagálni rá. Viszont ezt kipróbálva abba a problémába ütközünk, hogy a program addig "lefagy" amíg nem kap üzenetet. Ez ividens, ugyanis a \verb|socket.recv(&request)| sor lényege, hogy addig vár, amíg nem kap üzenetet. Ezt egy végtelen ciklusba rakva láthatóvá válik mi is a gond.
 
 Ennek kiküszöbölése érdekében egy külön függvényben kell definiálni a szerver kódját, majd egy új szálat indítani, és ennek párhuzamosan kell futnia a program többi részével. Így nem fagy le a programunk, és a fentebb leírt periféria manipuláló függvényeket is meg tudjuk hívni.
-\pagebreak
+
 \begin{cpp}
 
     void ZeroMQLoop()
-    {
-    
-        zmq::context_t context(1);
-        zmq::socket_t socket(context, ZMQ_REP);
-        socket.bind("tcp://*:5555");
-    
-        while (true) {
-            zmq::message_t request;
-    
-            //  Wait for next request from client
-            socket.recv(&request);
-            LOG_MSG(request.to_string().c_str());
-    
-            std::vector<std::string> result;
-            std::istringstream iss(request.to_string());
-            for (std::string s; iss >> s; )
-                result.push_back(s);
-    
-            if (result[0] == "Mouse")
-            {
-                LOG_MSG(result[1].c_str());
-                LOG_MSG(result[2].c_str());
-                //Mouse_CursorSet(0,0);
-                Mouse_CursorSet(stof(result[1]), stof(result[2]));
-                Mouse_ButtonPressed(0);
-                Mouse_ButtonReleased(0);
-            }
-    
-            else if (result[0] == "start")
-            {
-                KEYBOARD_AddKey(KBD_s, 1);
-                KEYBOARD_AddKey(KBD_s, 0);
-                Sleep(500);
-                KEYBOARD_AddKey(KBD_u, 1);
-                KEYBOARD_AddKey(KBD_u, 0);
-                Sleep(500);
-                KEYBOARD_AddKey(KBD_m, 1);
-                KEYBOARD_AddKey(KBD_m, 0);
-                Sleep(500);
-                // Click to Forest
-                KEYBOARD_AddKey(KBD_o, 1);
-                KEYBOARD_AddKey(KBD_o, 0);
-            }
-    
-            //  Send reply
-            zmq::message_t reply(5);
-            memcpy(reply.data(), "Done", 4);
-            
-            socket.send(reply);
-        }
-    }
+{
+	zmq::context_t context(1);
+	zmq::socket_t socket(context, ZMQ_REP);
+	socket.bind("tcp://*:5555");
+
+	while (true) {
+		zmq::message_t request;
+
+		//  Wait for next request from client
+		socket.recv(&request);
+		LOG_MSG(request.to_string().c_str());
+
+		std::vector<std::string> result;
+		std::istringstream iss(request.to_string());
+		for (std::string s; iss >> s; )
+			result.push_back(s);
+
+		if (result[0] == "Click")
+		{
+			// Click code
+		}
+
+		else if (result[0] == "Move")
+		{
+			// Move code
+
+		}
+
+		else if (result[0] == "Gather")
+		{
+			// Gather code
+		}
+
+		else if (result[0] == "Attack")
+		{
+			// Attack code
+		}
+
+		else if (result[0] == "Start")
+		{
+			// Start code
+		}
+
+		//  Send reply back to client
+		zmq::message_t reply(5);
+		memcpy(reply.data(), "World", 5);
+		
+		socket.send(reply);
+	}
 
     
 \end{cpp}
+
+\Section{AI}
