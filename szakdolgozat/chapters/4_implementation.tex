@@ -336,7 +336,7 @@ Ennek kiküszöbölése érdekében egy külön függvényben kell definiálni a
 
 		//  Send reply back to client
 		zmq::message_t reply(5);
-		memcpy(reply.data(), "World", 5);
+		memcpy(reply.data(), "Done", 4);
 		
 		socket.send(reply);
 	}
@@ -345,3 +345,373 @@ Ennek kiküszöbölése érdekében egy külön függvényben kell definiálni a
 \end{cpp}
 
 \Section{AI}
+
+A DosBox módosítása után a konkrét program megírása következik. A legjobb megoldás ehhez az, ha egy külön osztályt készítünk az AI-nak, és annak definiáljuk az adattagokat és metódusokat. Ehhez fel kell írni hogy mégis milyen adatokra van szükség.
+
+\begin{itemize}
+    \item Tudni kell hogy az egyes nyersanyagokból éppen mennyi áll rendelkezésre
+    \item A térkép jelenlegi állását/állásait is le kell menteni
+    \item Elvégzendő parancsok listája
+    \item Kapcsolat a DosBox-al
+\end{itemize}
+
+\textit{Természetesen a lista nem teljes, fejlesztés során bővülhet, de a legfontosabb dolgokat tartalmazza}
+
+\subsection{Működés részletes leírása}
+
+Ezt követően létre kell hozni a kapcsolatot az "agy" és a "test között". Ugyanis technikailag a "gondolkodást" a pythonban írt AI fogja véghez vinni, elküldeni a teendőket a DosBoxna, majd az végrehajtja. Az adatok küldéséhez az előző pontban leírt
+ZeroMQ-s megoldást fogjuk használni. Az AI osztályunk példányosítása után, a \textit{Start()} metódussal indítható, és a \textit{Stop()} metódussal állítható meg. 
+
+A végtelen ciklust itt is érdemes megtartani, ugyanis nem tudhatjuk meddig szeretné a felhasználó használni a programot, és szinte másodpercenként üzenetet kell továbbítania, így ezért sem előnyös leállítani. Az egyszerű
+leállítás érdekében ugyanakkor a ciklust egy try blokkban definiáltam, ami kivételt dob amennyiben a felhasználó billentyűzet megszakítást küld (példálul ctrl+c a terminálban) a program elkezdi a leállás folyamatát, megszakítja a kapcsolatot a DosBoxal és leáll.
+
+Ennek függvényében nézzük meg milyen lépések vannak:
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[scale=0.4]{images/image0.png}
+    \caption{Végrehajtandó lépések}
+    \label{fig:lepesek}
+\end{figure}
+
+Ezen az ábrán jól látható a ciklikusság, továbbá az is, hogy a program terminálódása életciklusának bármelyik szakaszában bekövetkezhet, amikor is megszakítást kap a felhasználótól.
+
+Az összképet látva, első dolgunk, még mielőtt bármiféle logikát be tudnánk programozni, a tervben szereplő adatfeldolgozás létrehozása, azaz lementett képből kell olyan használható adatokat kinyerni, amelyek segítségével konkrét parancsot lehet előállítani. 
+A beolvasáshoz a config fájlban használt elérési útvonalat tudjuk használni, így könnyen változtathatóak.
+
+Alapértelmezett konfigurációs fájl:
+\begin{python}
+    class Config:
+        tesseract = r".\TesseractOCR\tesseract.exe"
+        capture = r".\capture\war_000.png"
+\end{python}
+
+Kép beolvasása:
+
+\begin{python}
+    ...
+
+    while self.loop:
+
+        ... 
+        
+        image = cv2.imread(Config.capture)
+
+        ...
+\end{python}
+
+
+\begin{figure}[h]
+\centering
+\includegraphics[scale=1]{images/war_000.png}
+\caption{Egy DosBox által lementett kép.}
+\label{fig:abra}
+\end{figure}
+
+Beolvasás után jöhet az adatok kinyerési. Itt van egy kis szabadságunk hogy mivel kezdünk, én úgy gondoltam a nyersanyagok számának meghatározását veszem előre. A függvény bemenetként a nyersanyag nevét kéri, és ndarray-t, 
+ami lényegében a beolvasott kép azon szelete ahol az adott nyersanyag található.
+Maga a függvény így néz ki:
+
+\begin{python}
+def ReadText(self,name: str,cropImage: np.ndarray):
+
+    if cropImage is None:
+        return
+
+    scale_percent = 600 
+    width = int(cropImage.shape[1] * scale_percent / 100)
+    height = int(cropImage.shape[0] * scale_percent / 100)
+    dimension = (width, height)
+
+
+    res = cv2.resize(cropImage, dimension, 
+                    interpolation = cv2.INTER_AREA)
+    gray = cv2.cvtColor(res, cv2.COLOR_BGR2GRAY)
+
+    thresh = cv2.threshold(gray, 200, 255, 
+                        cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1]
+
+    skeleton = cv2.threshold(thresh,0,1,cv2.THRESH_BINARY)[1]
+    skeleton = (255*skeletonize(skeleton)).astype(np.uint8)
+    kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (4,6)) 
+    skeleton_dilated = ~cv2.morphologyEx(skeleton, 
+                            cv2.MORPH_DILATE, kernel)
+
+    data = pytesseract.image_to_string(skeleton_dilated, 
+    lang='eng', config='--psm 10 -c tessedit_char_whitelist=0123456789s')
+    print(f"{name}: "+data.replace("\$","8").replace("o","0")
+                    .replace("s","5").replace("i","1"))
+
+    cv2.imwrite(f"{name}.png",skeleton_dilated)
+\end{python}
+
+Szinte sorról sorra magyarázva ez azt csinálja, hogy először megnézzük létezik-e ez a kép részlet, amennyiben nem, a függvény azonnal visszatér. Ezt azért tehetjük meg, mert másodpercenként minimum egyszer frissülnek az adatok, így nem probléma ha néha-néha kimarad egy ilyen frissítési ciklus, és így a program is fut tovább ahelyett hogy hibát dobna.
+Először megadjuk a nagyítás mértékét, ez több próbálkozás után lett 600\%-os, mivel ez bizonyult a legjobbnak. Kiszámoljuk az így kapott hosszt és szélességet, majd a \textit{dimension} változóba eltároljuk későbbi használatra. 
+A \textit{res} változóban lesz maga kivágott kép nagyított változata, amihez a \textit{cv2.INTER\_AREA} interpolációját használjuk, ami a képek nagyítását szolgálja.
+
+Annak érdekében hogy a \textit{tesseract} képes legyen felismerni a számokat, a színes képet érdemes szürkeárnyalatos képpé alakítani alakítani, ezt a \textit{gray} változóba tároljuk a \textit{cv2.cvtColor} függvény segítségével, aminek a használata elég egyszerű
+megadjuk a módosítani kívánt képet, és a módosítást. Ez esetben ez a \textit{cv2.COLOR\_BGR2GRAY} lesz, amivel egyszerűen elérhető a kívánt eredmény.
+Habár a szürke árnyalatos kép hatalmas előrelépés, egy küszöbérték függvény is érdemes alkalmazni amivel ki tudjuk emelni a számunkra fontos adatokat a képen, ami ez esetben maga a szám.
+
+
+% ref: https://www.geeksforgeeks.org/python-thresholding-techniques-using-opencv-set-1-simple-thresholding/
+
+\begin{equation*}
+    output(x,y) = \left\{ 
+    \begin{matrix}
+        max, & \text{ha } input(x,y) > thres \\
+        0, & \text{egyébként}
+    \end{matrix} \right.
+\end{equation*}
+
+Ennek az inverze
+
+\begin{equation*}
+    outputinv(x,y) = \left\{ 
+    \begin{matrix}
+        0, & \text{ha } input(x,y) > thres \\
+        max, & \text{egyébként}
+    \end{matrix} \right.
+\end{equation*}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[scale=1]{images/grey.png}
+    \includegraphics[scale=1]{images/thres.png}
+    \caption{Szürkeárnyalatos (bal) és küszöbértékes (jobb) kép.}
+    \label{fig:numbers}
+\end{figure}
+
+//TODO skeleton
+
+A fájlba mentés opcionális, mivel nem kell beolvasni, de megnyitva ez látható: 
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[scale=1]{images/Lumber.png}
+    \includegraphics[scale=1]{images/Gold.png}
+    \caption{Bal oldalon a jelenlegi fák száma látható, míg jobb oldalon az arany száma. }
+    \label{fig:numbers}
+\end{figure}
+
+Ahogyan a nyersanyagok adatait, úgy a térkép adatait is le kell menteni. Ha térkép lemérése után azt tapasztaljuk hogy a mérete 64x64, ahol egy pixel egy tile-t jelent, azaz ezen csak egyetlen egy egység állhat. Az épületek ennél bonyolultabbak, ugyanis a méretük lehet 2x2 vagy 3x3 is, 
+de ez sem okoz akkora problémát, nyugodtan feloszthatjuk a térképet 64x64 mezőre. Nem előnyös ugyanakkor minden információt egy 64x64 méretű listában/tömbben tárolni, így az információ típusától függően 3 csoportra osztottam:
+
+\begin{itemize}
+    \item Nyersanyag térkép: csak a nyersanyagokat és a munkásokat tárolja
+    \item Felfedező térkép: azt az értéket tárolja hogy fel van-e fedezve az adott mező vagy sem, továbbá a saját és az ellenséges katonákat is.
+    \item Épület térkép: A felépült épületeket és utakat tárolja 
+\end{itemize}
+
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[scale=2]{images/map.png}
+    \caption{A térkép kivágva, ahogyan a program dolgozik vele}
+    \label{fig:map}
+\end{figure}
+
+\begin{python}
+def UpdateMap(self,cropMap):
+    self.offset = self.GetOffset(cropMap)
+    for i in range(64):
+        for j in range(64):
+            if(list(cropMap[i][j]) == [0,0,0]):
+                self.map[1][i][j] = -1
+            elif(list(cropMap[i][j]) == [0,0,255]):
+                self.map[2][i][j] = 100
+            elif(i+1 != 64 and j+1 != 64 
+            and list(cropMap[i][j]) == [199,199,199] 
+            and list(cropMap[i+1][j]) == [199,199,199] 
+            and list(cropMap[i+1][j+1]) == [199,199,199] 
+            and list(cropMap[i][j+1]) == [199,199,199]):
+                self.map[0][i][j] = 3    
+\end{python}
+
+A térkép frissítése a fentebb látható kód alapján történik. Itt lényegében pixelenként át kell nézni a képet, majd az adott szín alapján következtetésrekre jutni és az adott lista adott elemébe betölteni a megfelelő értéket.
+
+Miután a térképről kinyertük a szükséges adatokat, ideje a játéktérre fókuszálni, itt látható ugyanis a térkép egy 15x11 mező méretű szelete, ahol tudjuk az egységeket irányítani, nyersanyagokat szerezni, és építeni.
+Egy mező mérete 16x16 pixel, ugyanakkor ugyan ez a mező a térképen 1x1 pixelt jelentett, így jön az ki, hogy a játéktér 15x11 mezőt foglal magában, amit az alábbi kép is alátámaszt.
+\begin{figure}[h]
+    \centering
+    \includegraphics[scale=0.8]{images/playArea.png}
+    \includegraphics[scale=0.53]{images/playAreaRed.png}
+    \caption{Játéktér rácsok nélkül (bal) és rácsokkal (jobb)}
+    \label{fig:playArea}
+\end{figure}
+
+Itt szépen kivehető, hogy egy egység 1 mezőt foglal el, és pontosan illeszkedik ré (kivéve mozgáskor, de ez elhanyagolható), az épületek és utak körvonala is tisztán látszik hogy szabályos.
+Ebből arra a következtetésre lehet jutni, hogy a játéktéren belül is érdemes mezőnként átnézni a képet és az adott 16x16-os blokkon belül érzékelni hogy milyen típusú objektumot találtunk.
+
+Ehhez egy \textit{Unit} segédosztály hozunk létre, ami megadja az általános formáját az eltárolni kívánt objektumnak.
+
+\begin{python}
+
+class Unit:
+    def __init__(self,location,color,threshold,mapmode,_id):
+        self.location = location
+        self.color = color
+        self.threshold = threshold
+        self.mapmode = mapmode
+        self.id = _id
+\end{python}
+
+Mint látható egy nagyon egyszerű, csak konstruktort tartalmazó osztályról van szó, aminek pusztán annyi lényege van, hogy a könnyebb kezelhetőség érdekében "csomagba" rakja egy adott objektumra vonatkozó összes hasznos adatot.
+
+Az adattakok jelentései a következők:
+\begin{itemize}
+    \item \textit{location:} Az a hely, ahol az adott objektum spritejai vannak.
+    \item \textit{color:} A keret színét adja meg
+    \item \textit{threshold:} Megadja a hibahatár mértékét. 
+    \item \textit{mapmode:} Megadja melyik térképre akarjuk menteni 
+    \item \textit{id:}  Megadja az egyedi azonosítót
+\end{itemize}
+
+Így ezt az osztályt a következő lépésben használhatjuk. Ennek a lépésnek a lényege konkrétan meghatározni hogy mit is látunk a játéktéren. Ezt egyfajta \textit{template matching}-el hajtjuk végre, melynek kódja a következő:
+
+\begin{python}
+def TemplateMatching(self,playArea):
+    img_gray = cv2.cvtColor(playArea, cv2.COLOR_BGR2GRAY)
+
+    units = [
+            Unit('./imgs/footman',(255,0,0),0.85,1,1),
+            Unit('./imgs/peasant',(0,100,255),0.85,0,1),
+            Unit('./imgs/buildings',(0,255,255),0.76,2,1),
+            Unit('./imgs/tree',(19,69,139),0.8,0,2)
+            ]
+
+    for unit in units:
+        for filename in os.listdir(unit.location):
+            
+            template = cv2.imread(f"{unit.location}/{filename}",0)
+            w, h = template.shape[::-1]
+            for i in range(2):
+                template = cv2.flip(template,1)
+                res = cv2.matchTemplate(img_gray,template,
+                                    cv2.TM_CCOEFF_NORMED)
+                threshold = unit.threshold
+                loc = np.where( res >= threshold)
+
+                for pt in zip(*loc[::-1]):
+                    if self.offset != None:
+                        if(unit.mapmode == 2):
+                            try:
+                                self.map[unit.mapmode][self.offset[0]+
+                                math.ceil(pt[1] / 16)][self.offset[1]+
+                                math.ceil(pt[0] / 16)] = 
+                                int(filename[:len(filename)-4])
+                            except:
+                                pass
+                        else:
+                            try:
+                                self.map[unit.mapmode][self.offset[0]+
+                                math.ceil(pt[1] / 16)][self.offset[1]+
+                                math.ceil(pt[0] / 16)] = unit.id
+                            except:
+                                pass
+                    cv2.rectangle(playArea, pt, (pt[0] + w, pt[1] + h),
+                                  unit.color, 2)
+                    cv2.imwrite('res.png',playArea)
+\end{python}
+
+Ismerős elemeket láthatunk a függvény elején, a képet szokás szerint szürkeárnyalatossá kell konvártálni, majd egy \textit{units} nevű listába példányosítjuk a szükséges objektumokat. Itt megjegyzendő, hogy a \textit{color} adattag fordított rgb sorrendben működik, a \textit{threshold} lényege pedig hogy hány százalékos legyen az egyezes (értelem szerűen 0 és 1 közötti értéket fogad el).
+
+Az algoritmust minden egyes objektumra, és azoknak minden egyes változatára lefuttatjuk. Például az embereknél a \textit{footman} nevű egység lenne maga az objektum, és annak rengeteg állapota van (lefelé néz, felfelé néz, jobbra néz stb.) így azokat is ellenőrizni kell hogy rajta vannak-e a játéktéren. Továbbá a \textit{cv2.flip()} függvény
+segítségével ezeknek a tükörképét is ellenőrizzük, ugyanis lehetséges hogy valamelyik mozdulatnak a tükörképe is létezik. Ez a folyamat habár hosszúnak tűnhet a sok egymásba ágyazott \textit{for} ciklus miatt, nem vesz el szignifikáns számítási időt tapasztalatom szerint, ami a kép viszonylag apró mérete miatt lehetséges. 
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[scale=1]{images/res.png}
+    \caption{A template matching eredménye}
+    \label{fig:rect}
+\end{figure}
+\pagebreak
+Most hogy az összes adat a rendelkezésünkre áll, ideje megnézni a fentebb beszélt fázisokat bővebben.
+A lépéseket az alábbi ábra szemlélteti:
+\begin{figure}[h]
+    \centering
+    \includegraphics[scale=0.4]{images/phases.png}
+    \caption{A fázisok lépései}
+    \label{fig:phases}
+\end{figure}
+
+Mint látható ez is ciklikusan történik, mégpedig úgy, hogy a ciklus elindul a nyersanyag gyűjtési fázisnál, eldöntésre kerül milyen parancsokat kell tovább küldeni, majd amikor beolvasásra került a következő kép, akkor folytatódik a felfedezési fázissal. Így gyakorlatilag minden 4 beolvasás után térünk vissza az eredeti állapotba.
+
+\begin{enumerate}
+    \item \textbf{Nyersanyag gyűjtés}
+
+    Ebben a fázisban átnézzük a térképet, amelyet az előző lépésekben feltöltöttünk adatokkal. Kigyűjtjük a parasztok, fák és aranybányák koordinátáit, majd elküldjük őket dolgozni vagy felfedezni, az alapján hogy van-e nyersanyag a játéktéren.
+
+    \begin{python}
+        
+def GatherPhase(self):
+    peasants = []
+    trees = []
+    mines = []
+
+    for i in range(64):
+        for j in range(64):
+            if(self.map[0][i][j] == 1):
+                peasants.append([i,j])
+            elif(self.map[0][i][j] == 2):
+                trees.append([i,j])
+            elif(self.map[0][i][j] == 3):
+                mines.append([i,j])
+
+    i = random.randint(1,2)
+    for peasant in peasants:
+            
+        if(i % 2 == 0):
+            if( len(trees) > 0):
+                self.commands.append(f"Gather 
+                {self.GetClickCoord(peasant[0],
+                peasant[1],1)} { self.GetClickCoord(trees[0][0],
+                trees[0][1],0)}")
+            else:
+                self.MoveUnitUnexplored(peasant[0],peasant[1])
+        else:
+            if( len(mines) > 0):
+                self.commands.append(f"Gather 
+                {self.GetClickCoord(peasant[0],
+                peasant[1],1)} { self.ClickOnMinimap(mines[0][1]
+                ,mines[0][0])}")
+            else:
+                self.MoveUnitUnexplored(peasant[0],peasant[1])
+        i += 1
+\end{python}
+
+\item \textbf{Felfedezés}
+Ez a fázis magától értetődő, itt a játéktéren látható katonákat küldjük el felfedezni egy véletlenszerű koordinátára.
+ \begin{python}
+def ExplorePhase(self):
+
+    soldiers=[]
+    target = None
+        
+    for i in range(64):
+        for j in range(64):
+            if(self.map[1][i][j] == 1):
+                soldiers.append([i,j])
+    if(len(soldiers) > 0):
+        self.MoveUnitUnexplored(soldiers[0][0]+1,
+        soldiers[0][1]+1)
+    \end{python}
+
+    \item \textbf{Kiképzés}
+    
+    \begin{python}
+def TrainPhase(self):
+    for i in range(64):
+        for j in range(64):
+            if(self.map[2][i][j] == 1):
+                print([i,j])
+                self.commands.append(f"Click 
+                        {self.GetClickCoord(i,j,0)}")
+                self.commands.append(f"Click 30 120")
+                break
+    \end{python}
+
+    \item \textbf{Építés}
+    
+\end{enumerate}
+
