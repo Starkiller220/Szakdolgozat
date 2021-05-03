@@ -482,7 +482,7 @@ Ennek az inverze
     \label{fig:numbers}
 \end{figure}
 
-A következő lépés az úgynevezett \textit{skeletonization}{\cite{skeletonization}}, 
+A következő lépés az úgynevezett \textit{skeletonization}{\cite{skeletonization}}, aminek lényege a kép "vázának" megjelenítése és élesítese a háttér és egyéb nem fontos információ nélkül, továbbá mivel az eredeti kép "pixeles", valahogyan le kell kerekíteni hogy a Tesseract könnyebben felismerje, a skeletonization ebben is a segítségünkre van. Utolsó lépésnek invertálni kell a képet, hogy a szám az fekete legyen, ezt a \textit{~} karakter segítségével tehetjük meg.
 
 A fájlba mentés opcionális, mivel nem kell beolvasni, de megnyitva ez látható: 
 
@@ -714,6 +714,39 @@ def TrainPhase(self):
 
     \item \textbf{Építés}
     
+    \begin{python}
+def BuildPhase(self):
+# 300 500
+# 500 600
+
+peasants = []
+locations = []
+
+for i in range(64):
+    for j in range(64):
+        if(self.map[0][i][j] == 1):
+            peasants.append([i,j])
+        if(i < 62 and j < 62 and self.map[1][i][j] == 0 and 
+        self.map[1][i+1][j] == 0 and 
+        self.map[1][i][j+1] == 0 and 
+        self.map[1][i+1][j+1] == 0 ):
+                    
+            road = False
+            building = False
+
+            ... # More code here
+           
+if(len(locations) > 0):
+    for peasant in peasants:
+            print(locations[0])
+            self.commands.append(f"Build 
+            {self.GetClickCoord(peasant[0],
+            peasant[1],1)} 50 130 
+            {self.GetClickCoord(locations[0][1],
+            locations[0][0],0)}")
+
+    \end{python}
+
     Az építés azt az elvet követi, miszerint minden épület köré kell legalább egy út, továbbá az épület körüli két mezőben legalább egy másik épület. Nem bonyolult szabály, ugyanakkor ez a program legsebezhetőbb része, ugyanis a kalkulációk és a sok kattintás parancs miatt nem mindig sikerül véghezvinni az építési parancsot. Mivel az algoritmus jó, ez egyértelműen a Dosbox limitációjának tudható be.
 
     \item \textbf{Harc}
@@ -730,7 +763,15 @@ Felmerülhet ugyanakkor a kérdés, hogy mi történik hogy ha egy parancs már 
 \begin{python}
 if(len(self.commands) != 0):
     self.socket.send(bytes(self.commands[0],'utf-8'))
-    elf.commands.remove(self.commands[0])
+    self.commands.remove(self.commands[0])
 else:
     self.socket.send(bytes(f"Skip",'utf-8'))
 \end{python}
+
+\section{Limitációk}
+
+Sajnos mint minden programnak, ennek is megvannak a hátrányai. A fejlesztés során azt tapasztaltam, hogy a Dosboxon belül kiadott folytonos egymás után történi kattintás/billenytű parancs hatására némelyik akció "elveszlik". Lehetséges hogy ez egy beépített mechanizmus hogy a fals inputokat kiszűrje, van ehhez hasonló a kódban, de annak kivételekor az egész input rendszer működésképtelen, így a megkerülése lehetetlen.
+
+Ezt úgy sikerült kiküszöbölni, hogy "fékeket" építettem a kattintós parancsok közé, továbbá saját függvényt írtam hozzá.
+
+Ezzel sikerült a negatív hatást csökkenteni, ugyanakkor olykor-olykor előfordul, amiből az MI nehezen, vagy szinte sehogysem épül fel. A program futását nem akadályozza, nem áll le, de ilyenkor célszerű a játékot manuálisan újra indítani ha egy látványosabb végigjátszást akar az ember. Ugyanakkor ez a módszer teret adhat más emulátorok kezelésének automatizálására (pl.: videojáték konzolok) és amennyiben ott ezek a problémák nem merülnek fel, az eredményt hatványozottan javítani lehet.
