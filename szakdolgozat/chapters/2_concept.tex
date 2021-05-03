@@ -1,7 +1,7 @@
 \Chapter{Hasonló alkalmazások és koncepció}
 
 \Section{Mesterséges intelligencia a videojátékokban}
-A mesterséges intelligencia már több mint fél évszázada foglalkoztatja az embereket, mind a tudományos fantasztikus regényekben, mind az informatikában, ambár az utóbbi az viszonylag újkeletű dolog. Az első definíció, és maga a fogalom mint mesterséges intelligencia (artificial intelligence) egy amerikai informatikustól John McCarthytól származik, 1956ból.
+A mesterséges intelligencia már több mint fél évszázada foglalkoztatja az embereket, mind a tudományos fantasztikus regényekben, mind az informatikában, ambár az utóbbi az viszonylag újkeletű dolog. Az első definíció, és maga a fogalom mint mesterséges intelligencia (artificial intelligence) egy amerikai informatikustól John McCarthytól származik, 1956ból{\cite{ai}}.
 %ref: https://courses.cs.washington.edu/courses/csep590/06au/projects/history-ai.pdf
 
 Videojátékok terén is az 50es évekre tehető a kezdet, 1950ben mutatták be a "Bertie the Brain" nevezetű számítógépet, mely segítségével mesterséges intelligencia ellen lehetett játszani a Tic-tac-toe nevezetű játékot. Egy évre rá 1951ben kiadták a Brit Nimrod nevezetű számítógépet ahol szintén gépi ellenfél ellen lehetett megmérkőzni, de ezúttal a Nim nevű játékban.
@@ -16,17 +16,6 @@ Természetesen sokakban kritika is megfogalmazódott, hogy nem-e úgy vannak lep
 
 Felmerül ugyanakkor a kérdés, hogy amennyiben egy videojátékba be lehet programozni egy mesterséges intelligenciát ami ellenfélnek (vagy csapattársnak) szolgál az emberi játékos számára, meg lehet-e tanítani vagy be lehet-e programozni egy másik MI-t arra hogy játszon egy játékkal? A továbbiakban ezzel a kérdskörrel fogunk foglalkozni.
 
-\Section{Ember a gép ellen}
-%aaaaa Alphago!
-
-\subsection{AlphaStar}
-Talán a legjobb eredményt a Deepmind mesterséges intelligenciája érte el a StarCraft II nevű játékban, mely jelenleg jobb a játékosok 99,8\%-nál. 
-%ref:https://www.theverge.com/2019/10/30/20939147/deepmind-google-alphastar-starcraft-2-research-grandmaster-level
-Ez a játék talán a legkomplexebb a jelenlegi stratégiai játékok közül, nem hiába fektetnek komoly pénzeket a verseny szintű mérkőzések lebonyolítására.
-Léteztek már az AlphaStar előtt is MI-k amik képesek voltak valamilyen szinten játszani, de azok valamiféle előnyt kaptak a cél elérése érdekében, például egyszerűsített pályák, korlátozott játékmenet, emberfeletti képességek, így azok teljesítménye közel sem éri el az elvárt szintet.
-
-Nagy probléma továbbá leküzdeni azt, hogy egyszerűbb játékokkal szemben (mint például a Tic-tac-toe vagy a kő-papír-olló) nincsen úgymond "legjobb stratégia", így rengeteg esetet kell vizsgálni és folyamatosan új módszereket keresni. Ugyanígy a már említett táblás játékokhoz való hozzáállást sem lehet alkalmazni, mert amíg a sakkban és a goban minden információ adott, egy ilyen stratégiai játékban rengeteg a rejtett, ismeretlen tényező, amelyet fel kell fedezni. Mindezt nehezíti hogy ezt valós időben, vagy legalábbis minimális késlekedéssel kell elemezni és döntést hozni, ráadásul figyelembe venni a hosszú távú tervezést is. Ugyanígy a sakkal ellentétben, ahol csak 6 féle bábú van, és egyszerre maximum 32 játszik egy adott mérkőzésen, egy videojátékban több tucat egység variáns lehet, amelyekből több száz is létezhet egyidejűleg, ezzel növelve a komplexitást.
-
 \Section{A Warcraft játékmechanikája}
 
 2 faj közül lehet választani, ember és ork. Mivel egy korai játékról van szó, a fajok között csak kozmetikai különbségek vannak, mindegy egységnek és épületnek megvan a másik fajba tartozó párja, és még a statisztikái is ugyan azok. Ez egy olcsó mód arra hogy egyensúlyban legyen a két faj így nem befolyásolja különösebben a játék lefolyását.
@@ -39,6 +28,22 @@ Bármelyik módot is választjuk, célunk ugyan az, le kell győznünk az ellens
 Figyelni kell ugyanakkor arra is, hogy legyen elég lakhely az embereinknek, amit farmok építésével lehet növelni. Az építési mechanizmus nem bonyolult, habár korlátozott, ugyanis csak épület és út közelében lehet építeni, így előbb az utat kell kiépíteni, ami aranyba kerül, és csak ez után lehetséges az épületek felhúzása. Különböző épületek más-más szerepet töltenek be és más egységeket lehet képezni bennük. 
 
 A felfedezésnek is nagy szerepe van az ilyen stílusú játékban, ugyanis kezdetkor csak a térkép minimális részére van rálátásunk, így érdemes néhány egységgel felfedezni. Ebben a játékban ez különösen fontos, ugyanis a játék kora miatt még nem létezett az úgynevezett "Fog of War", aminek a lényege, hogy nem látható a pálya minden része, csak az, ami a játékos által irányított egységek/épületek látómezejében van. Így a Warcraftban hatalmas előny a felfedezett terület, mert így folyamatosan lehet figyelni az ellenséges mozdulatokat.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[scale=1]{images/wc.png}
+    \caption{A fázisok lépései}
+    \label{fig:warcraft}
+\end{figure}
+
+\Section{Ember a gép ellen}
+\subsection{AlphaStar}
+Talán a legjobb eredményt a Deepmind mesterséges intelligenciája érte el a StarCraft II nevű játékban, mely jelenleg jobb a játékosok 99,8\%-nál{\cite{deepmind}}. 
+%ref:https://www.theverge.com/2019/10/30/20939147/deepmind-google-alphastar-starcraft-2-research-grandmaster-level
+Ez a játék talán a legkomplexebb a jelenlegi stratégiai játékok közül, nem hiába fektetnek komoly pénzeket a verseny szintű mérkőzések lebonyolítására.
+Léteztek már az AlphaStar előtt is MI-k amik képesek voltak valamilyen szinten játszani, de azok valamiféle előnyt kaptak a cél elérése érdekében, például egyszerűsített pályák, korlátozott játékmenet, emberfeletti képességek, így azok teljesítménye közel sem éri el az elvárt szintet.
+
+Nagy probléma továbbá leküzdeni azt, hogy egyszerűbb játékokkal szemben (mint például a Tic-tac-toe vagy a kő-papír-olló) nincsen úgymond "legjobb stratégia", így rengeteg esetet kell vizsgálni és folyamatosan új módszereket keresni. Ugyanígy a már említett táblás játékokhoz való hozzáállást sem lehet alkalmazni, mert amíg a sakkban és a goban minden információ adott, egy ilyen stratégiai játékban rengeteg a rejtett, ismeretlen tényező, amelyet fel kell fedezni. Mindezt nehezíti hogy ezt valós időben, vagy legalábbis minimális késlekedéssel kell elemezni és döntést hozni, ráadásul figyelembe venni a hosszú távú tervezést is. Ugyanígy a sakkal ellentétben, ahol csak 6 féle bábú van, és egyszerre maximum 32 játszik egy adott mérkőzésen, egy videojátékban több tucat egység variáns lehet, amelyekből több száz is létezhet egyidejűleg, ezzel növelve a komplexitást.
 
 \subsection{A StarCraft és a Warcraft}
 Mivel mind a két játékot a Blizzard készítette, rengeteg hasonlóság fedezhető fel bennük, ha mind a kettőből az eredeti, első részt vesszük, rájövünk hogy igazából a Starcraft az csak egy továbfejlesztett Warcraft másolat, sci-fi köntösbe bújtatva, és a fajok közötti különbséget már nem csak kinézetben kereshetjük, hanem az egységek statisztikái, és a különböző fajok játékstílusa is más. Ezt a legjobban egy táblázattal lehetne szemléltetni.
@@ -61,6 +66,7 @@ A győzelem úgy érhető el, hogy megsemmisítjük az összes ellenséges egys�
 \end{table}
 
 Látható hogy már a régebbi StarCraft is hatványozottabban komplexebb volt az spirituális elődjénél, így érthető hogy az utódhoz évekbe telt olyan intelligenciát írni, ami szinte mindekit legyőz.
+
 
 \Section{A Terv}
 

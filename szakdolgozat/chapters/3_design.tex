@@ -2,19 +2,24 @@
 
 \Section{Dosbox}
 
-A szoftver futtatásához elengedhetetlen egy DOS emulátor, amire a legjobb választás a nyílt forráskódú Dosbox. Az SDL multimédiás könyvtárat használja, és a lehető leghűbben lehet vele Dos-os környezetet emulálni. A nyílt forráskódnak köszönhetően betekintést lehet nyerni a működésébe, továbbá módosítani saját igényünknek megfelelően. Ez egy nagyon fontos pont számunkra, ugyanis a megoldandó feladathoz igazíthatjuk.
-
+A szoftver futtatásához elengedhetetlen egy DOS emulátor, amire a legjobb választás a nyílt forráskódú Dosbox{\cite{dosbox}}. Az SDL multimédiás könyvtárat használja, és a lehető leghűbben lehet vele Dos-os környezetet emulálni. A nyílt forráskódnak köszönhetően betekintést lehet nyerni a működésébe, továbbá módosítani saját igényünknek megfelelően. Ez egy nagyon fontos pont számunkra, ugyanis a megoldandó feladathoz igazíthatjuk.
+%ref: https://www.dosbox.com/
 \Section{OpenCv}
 
-Az OpenCv (teljes nevén Open Source Computer Vision Library) a nevéből adódóan egy nyílt forráskódú gépi látás és tanulás könyvtár, mely elérhető számos nyelven. Azért jött létre, hogy közös infrastruktúrát biztosítson gépi látáshoz és tanuláshoz, ezáltal felgyorsítsa az ezt alkalmazó programok fejlődését, és megsokszorozza a számát. Manapság a könyvtár több mint 2500 algoritmust tartalmaz és folyamatosan bővül.
+Az OpenCv{\cite{opencv}} (teljes nevén Open Source Computer Vision Library) a nevéből adódóan egy nyílt forráskódú gépi látás és tanulás könyvtár, mely elérhető számos nyelven. Azért jött létre, hogy közös infrastruktúrát biztosítson gépi látáshoz és tanuláshoz, ezáltal felgyorsítsa az ezt alkalmazó programok fejlődését, és megsokszorozza a számát. Manapság a könyvtár több mint 2500 algoritmust tartalmaz és folyamatosan bővül.
+%ref: https://opencv.org/
+
+\Section{Scikit-image}
+
+A Scikit-image egy képfeldolgozásra szakosodott python könyvtár, amely nyílt forráskódú, és kompatibilis rengeteg más könyvtárral (OpenCV, Numpy) így egyértelműen a hasznunkra vállhat a mesterséges intelligencia képfeldolgozó részénél.
 
 \Section{ZeroMQ}
 
-A ZeroMQ egy beágyazható hálózati könyvtár, mely úgy működik mint egy párhuzamossági keretrendszer. Olyan socketeket biztosít, amelyek atomi üzeneteket szállítanak különböző csatornákon keresztül, például folyamaton belül, folyamatok között, TCP-n és multicastban. A socketeket N-ről-N-re összekapcsolhatjuk olyan mintákkal, mint a fan-out, pub-sub, task distribution és request-reply. Aszinkron I/O modellje aszinkron üzenetfeldolgozási feladatokként felépített, skálázható többmagos alkalmazásokat biztosít. Számos nyelvi API-val rendelkezik, és a legtöbb operációs rendszeren fut. Ez hatalmas előny 2 különböző nyelven írt program összekapcsolásánál, és pont ez az ami miatt ezt a könyvtárat választottam.
-
+A ZeroMQ{\cite{zmq}} egy beágyazható hálózati könyvtár, mely úgy működik mint egy párhuzamossági keretrendszer. Olyan socketeket biztosít, amelyek atomi üzeneteket szállítanak különböző csatornákon keresztül, például folyamaton belül, folyamatok között, TCP-n és multicastban. A socketeket N-ről-N-re összekapcsolhatjuk olyan mintákkal, mint a fan-out, pub-sub, task distribution és request-reply. Aszinkron I/O modellje aszinkron üzenetfeldolgozási feladatokként felépített, skálázható többmagos alkalmazásokat biztosít. Számos nyelvi API-val rendelkezik, és a legtöbb operációs rendszeren fut. Ez hatalmas előny 2 különböző nyelven írt program összekapcsolásánál, és pont ez az ami miatt ezt a könyvtárat választottam.
+%ref: https://zeromq.org/
 \Section{GIMP}
 
-A GIMP (teljes nevén GNU Image Manipulation Program) egy nyílt forráskódú és ingyenes képszerkesztő mely több platformra is elérhető. Tudása megközelíti, és néhol le is körözi a fizetős társát, a Photoshop-ot. A szakdolgozat elkészítéséhez azért volt erre a szoftverre szükségem, mert nem minden warcraft-os sprite volt fellelhető az interneten, így sokakat nekem kellett kinyerni a játékról készített képernyőképekből. Ezt a folyamatot később részletezni is fogom. Számos harmadik féltől származó bővítés található hozzá, melyek közül kettő a hasznomra is vált (Save all és BIMP).
+A GIMP (teljes nevén GNU Image Manipulation Program) egy nyílt forráskódú és ingyenes képszerkesztő mely több platformra is elérhető. Tudása megközelíti, és néhol le is körözi a fizetős társát, a Photoshop-ot. A szakdolgozat elkészítéséhez azért volt erre a szoftverre szükségem, mert nem minden warcraft-os sprite volt fellelhető az interneten, így sokakat nekem kellett kinyerni a játékról készített képernyőképekből. Ezt a folyamatot később részletezni is fogom. Számos harmadik féltől származó bővítés található hozzá, melyek közül kettő a hasznomra is vált (Save all{\cite{saveall}} és BIMP{\cite{bimp}}).
 % ref: https://antumdeluge.wordpress.com/2017/12/20/export-all-open-images-in-gimp/
 % ref: https://alessandrofrancesconi.it/projects/bimp/
 
@@ -22,18 +27,22 @@ A GIMP (teljes nevén GNU Image Manipulation Program) egy nyílt forráskódú �
 \Section{Python}
 
 Maga a mesterséges intelligencia és a képfelismerő algoritmusok a DosBoxtól külön vannak kezelve, és a fentebb említett ZeroMQ segítségével küldöm el a kiszámított adatot vissza a DosBoxba. Ezeket pythonban progamozom le, amely egy viszonylag könnyen kezelhető, nyílt forráskódú és ingyenes programozási nyelv. Két fő verziója van, a 2.x és a 3.x, ezek közül már csak a 3.x támogatott és ezt használják a legtöbben, így én is ebben fogok dolgozni. Nagy előnye a nyelvnek, hogy egyszerű a szintaktikája ésr engeteg könyvtár érhető el hozzá, így nem kell minden alkalommal feltalálni a kereket.
-
+% ref: https://www.python.org/
 
 \Section{Numpy}
 
-A Numpy az előbb említett Pythonhoz egy könyvtár amely szintúgy nyílt forráskódú (mint a legtöbb python könyvtár). Működését tekintve numerikus számításokat segíti elő, könnyen kezelhető többdimenziós tömbökkel. Szinte elengedhetetlen kelléke a pythonban történő matematikai számításoknak.
+A Numpy{\cite{numpy}} az előbb említett Pythonhoz egy könyvtár amely szintúgy nyílt forráskódú (mint a legtöbb python könyvtár). Működését tekintve numerikus számításokat segíti elő, könnyen kezelhető többdimenziós tömbökkel. Szinte elengedhetetlen kelléke a pythonban történő matematikai számításoknak.
 % ref: https://numpy.org/
 
 \Section{Tesseract OCR és pytesseract}
 
-A Tesseract OCR (Optical Character Recognition - Optikai Karakter Felismerés) egy Google átlal fejlesztett szövegfelismerő motor. Beépített UTF-8 támogatottsággal rendelkezik, és több 100 nyelvet ismer alapértelmezetten.
+A Tesseract OCR{\cite{tesseract}} (Optical Character Recognition - Optikai Karakter Felismerés) egy Google átlal fejlesztett szövegfelismerő motor. Beépített UTF-8 támogatottsággal rendelkezik, és több 100 nyelvet ismer alapértelmezetten.
 
 A pytesseract az ezt használó python könyvtár, amely segítségével fel lehet majd ismerni a képernyőképen lévő karaktereket.
 
 % ref: https://github.com/tesseract-ocr/tesseract 
+% ref: https://github.com/UB-Mannheim/tesseract/wiki
+
+
+
 

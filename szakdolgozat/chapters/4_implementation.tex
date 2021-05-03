@@ -482,7 +482,7 @@ Ennek az inverze
     \label{fig:numbers}
 \end{figure}
 
-//TODO skeleton
+A következő lépés az úgynevezett \textit{skeletonization}{\cite{skeletonization}}, 
 
 A fájlba mentés opcionális, mivel nem kell beolvasni, de megnyitva ez látható: 
 
@@ -635,7 +635,7 @@ A lépéseket az alábbi ábra szemlélteti:
     \label{fig:phases}
 \end{figure}
 
-Mint látható ez is ciklikusan történik, mégpedig úgy, hogy a ciklus elindul a nyersanyag gyűjtési fázisnál, eldöntésre kerül milyen parancsokat kell tovább küldeni, majd amikor beolvasásra került a következő kép, akkor folytatódik a felfedezési fázissal. Így gyakorlatilag minden 4 beolvasás után térünk vissza az eredeti állapotba.
+Mint látható ez is ciklikusan történik, mégpedig úgy, hogy a ciklus elindul a nyersanyag gyűjtési fázisnál, eldöntésre kerül milyen parancsokat kell tovább küldeni, majd amikor beolvasásra került a következő kép, akkor folytatódik a felfedezési fázissal. Így gyakorlatilag minden 5. beolvasás után térünk vissza az eredeti állapotba.
 
 \begin{enumerate}
     \item \textbf{Nyersanyag gyűjtés}
@@ -699,6 +699,7 @@ def ExplorePhase(self):
 
     \item \textbf{Kiképzés}
     
+Szintén egyértelmű lépés. Az egységek kiképzése a feladata. Szimplán csak rákattint a megfelelő épületre, majd a létrehozni kívánt egységre.
     \begin{python}
 def TrainPhase(self):
     for i in range(64):
@@ -713,5 +714,23 @@ def TrainPhase(self):
 
     \item \textbf{Építés}
     
+    Az építés azt az elvet követi, miszerint minden épület köré kell legalább egy út, továbbá az épület körüli két mezőben legalább egy másik épület. Nem bonyolult szabály, ugyanakkor ez a program legsebezhetőbb része, ugyanis a kalkulációk és a sok kattintás parancs miatt nem mindig sikerül véghezvinni az építési parancsot. Mivel az algoritmus jó, ez egyértelműen a Dosbox limitációjának tudható be.
+
+    \item \textbf{Harc}
+
 \end{enumerate}
 
+
+Miután átnéztük az összes fázist, nézzük meg hogyan is történik az üzenetek átadása.
+
+Az alábbi kódrész egyes részei ismerősek lehetnek a tervezés fázisból, ahol is a ZeroMQ használatát tárgyaltuk. Itt ez annyival bonyolódik, hogy az elküldendő parancsokat egy listában kapjuk meg (amik az előző lépésben lettek hozzáadva) és érkezési sorrendben küldjük el őket, az elküldött üzeneteket meg töröljük.
+
+Felmerülhet ugyanakkor a kérdés, hogy mi történik hogy ha egy parancs már nem releváns? A kérdés jó, ugyanakkor tapasztalataim szerint nem történik "parancs beragadás" ugyanis egy-egy lépés csak 1-2 parancsot tartalmaz. Amennyiben ennél többre lenne szükségünk, érdemes lenne figyelni a parancsok "korát" és amelyiknek \textit{x}-nél több a kora azt törölni mert nem releváns többé.
+
+\begin{python}
+if(len(self.commands) != 0):
+    self.socket.send(bytes(self.commands[0],'utf-8'))
+    elf.commands.remove(self.commands[0])
+else:
+    self.socket.send(bytes(f"Skip",'utf-8'))
+\end{python}
