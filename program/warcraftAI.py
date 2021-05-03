@@ -22,7 +22,11 @@ class WarcraftAI:
 
 
     def Start(self):
-        self.MainLoop()
+        try:
+            self.MainLoop()
+        except(KeyboardInterrupt):
+            self.Stop()
+            exit
 
     def Stop(self):
         print("Exiting...")
@@ -36,7 +40,8 @@ class WarcraftAI:
                 Unit('./imgs/footman',(255,0,0),0.85,1,1),
                 Unit('./imgs/peasant',(0,100,255),0.85,0,1),
                 Unit('./imgs/buildings',(0,255,255),0.76,2,1),
-                Unit('./imgs/tree',(19,69,139),0.8,0,2)
+                Unit('./imgs/tree',(19,69,139),0.8,1,2),
+                Unit('./imgs/road',(255,255,255),0.8,2,1)
                 ]
 
         for unit in units:
@@ -52,7 +57,7 @@ class WarcraftAI:
 
                     for pt in zip(*loc[::-1]):
                         if self.offset != None:
-                            if(unit.mapmode == 2):
+                            if(unit.mapmode == 2 and unit.location == './imgs/buildings'):
                                 try:
                                     self.map[unit.mapmode][self.offset[0]+math.ceil(pt[1] / 16)][self.offset[1]+math.ceil(pt[0] / 16)] = int(filename[:len(filename)-4])
                                 except:
@@ -112,6 +117,7 @@ class WarcraftAI:
             for j in range(64):
                 if(list(cropMap[i][j]) == [0,0,0]):
                     self.map[1][i][j] = -1
+                    self.map[2][i][j] = -1
                 elif(list(cropMap[i][j]) == [0,0,255]):
                     self.map[2][i][j] = 100
                 elif(i+1 != 64 and j+1 != 64 and list(cropMap[i][j]) == [199,199,199] and list(cropMap[i+1][j]) == [199,199,199] and list(cropMap[i+1][j+1]) == [199,199,199] and  list(cropMap[i][j+1]) == [199,199,199]):
@@ -156,7 +162,7 @@ class WarcraftAI:
                 if(self.map[1][i][j] == 1):
                     soldiers.append([i,j])
         if(len(soldiers) > 0):
-            self.MoveUnitUnexplored(soldiers[0][0]+1,soldiers[0][1]+1)
+            self.MoveUnitUnexplored(soldiers[0][0]+1,soldiers[0][1]+0)
 
 
     def MoveUnitUnexplored(self,x,y):
@@ -175,16 +181,81 @@ class WarcraftAI:
             self.commands.append(f"Move {self.GetClickCoord(x,y,1)} { self.ClickOnMinimap(target[0],target[1]) }")
 
     def BuildPhase(self):
-        pass
+        # 300 500
+        # 500 600
+
+        peasants = []
+        locations = []
+
+        for i in range(64):
+            for j in range(64):
+                if(self.map[0][i][j] == 1):
+                    peasants.append([i,j])
+                if(i < 62 and j < 62 and self.map[1][i][j] == 0 and self.map[1][i+1][j] == 0 and self.map[1][i][j+1] == 0 and self.map[1][i+1][j+1] == 0 ):
+                    print(f"jó: {[j,i]}")
+                    
+                    road = False
+                    building = False
+
+                    for x in range(4):
+                        if(self.map[2][j-1][i-1-(x)] == 1):
+                            road = True
+                            break
+
+                    for x in range(4):
+                        if(self.map[2][j-1+(x)][i-1] == 1):
+                            road = True
+                            break
+
+                    for x in range(4):
+                        if(self.map[2][j+2][i+1-(x)] == 1):
+                            road = True
+                            break
+
+                    for x in range(4):
+                        if(self.map[2][j-2+(x)][i-1] == 1):
+                            road = True
+                            break
+
+
+                    for x in range(5):
+                        if(self.map[2][j-2][i-2-(x)] == 1):
+                            building = True
+                            break
+
+                    for x in range(5):
+                        if(self.map[2][j-2+(x)][i-2] == 1):
+                            building = True
+                            break    
+
+                    for x in range(5):
+                        if(self.map[2][j+3][i+2-(x)] == 1):
+                            building = True
+                            break
+
+                    for x in range(5):
+                        if(self.map[2][j-3+(x)][i-2] == 1):
+                            building = True
+                            break
+
+                    if(road and building):
+                        locations.append([j,i])
+           
+        print(len(locations))
+        if(len(locations) > 0):
+            for peasant in peasants:
+                    print(locations[0])
+                    self.commands.append(f"Build {self.GetClickCoord(peasant[0],peasant[1],1)} 50 130 {self.GetClickCoord(locations[0][1],locations[0][0],0)}")
+
 
     def TrainPhase(self):
         for i in range(64):
             for j in range(64):
                 if(self.map[2][i][j] == 1):
                     print([i,j])
-                    self.commands.append(f"Click {self.GetClickCoord(i,j,0)}")
+                    self.commands.append(f"Click {self.GetClickCoord(i,j,-1)}")
                     self.commands.append(f"Click 30 120")
-                    break
+                    return
 
 
     def CombatPhase(self):
@@ -204,32 +275,30 @@ class WarcraftAI:
 
     def NextStage(self):
         self.stage += 1
-        if self.stage > 4:
+        if self.stage > 5:
             self.stage = 0  
 
     def getValidLocations(self,cropmap):
         locations = []
-        iList = range(64)
-        jList = range(64)
 
-        for i in iList:
-            for j in jList:
-                if list(cropmap[i][j]) == [0,199,0]:
-                    found = False
+        for i in range(64):
+            for j in range(64):
+                found = False
+                if list(cropmap[i][j]) == [0,199,0]:                
                     for location in locations:
-                        if location[0] + 7 < i or location[1] + 7 < j and location[0] -7 < i or location[1] -7 < j:
+                        if ( (location[0] + 6 > j or location[1] + 6 > i) or (location[0] - 6 > j or location[1] - 6 > i)):
                             found = True
                             break
                     if not found:
                         locations.append([i,j])
 
 
-        print(locations)
+        print(f"locations: {locations}")
 
 
     def MainLoop(self):
         time.sleep(5)
-        self.socket.send(bytes("start",'utf-8'))
+        self.socket.send(bytes("Start",'utf-8'))
         message = self.socket.recv()
         print(f"Received reply {message}")
         time.sleep(1)
@@ -256,11 +325,15 @@ class WarcraftAI:
                 pass
                 self.GatherPhase()
             elif(self.stage == 1):
+                pass
                 self.ExplorePhase()
             elif(self.stage == 2):
                 pass
                 self.TrainPhase()
             elif(self.stage == 3):
+                self.BuildPhase()
+            elif(self.stage == 4):
+                pass
                 self.CombatPhase()
             
             if(len(self.commands) != 0):

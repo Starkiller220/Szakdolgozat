@@ -108,6 +108,20 @@ void ZeroMQLoop()
 			
 		}
 
+		else if (result[0] == "Build")
+		{
+			LOG_MSG(result[1].c_str());
+			LOG_MSG(result[2].c_str());
+			Mouse_Click(stof(result[1]), stof(result[2]));
+			Sleep(200);
+			Mouse_Click(50, 175);
+			Sleep(100);
+			Mouse_Click(stof(result[3]), stof(result[4]));
+			Sleep(100);
+			Mouse_Click(stof(result[5]), stof(result[6]));
+
+		}
+
 		else if (result[0] == "Attack")
 		{
 			LOG_MSG(result[1].c_str());
