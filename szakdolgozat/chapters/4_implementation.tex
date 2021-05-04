@@ -2,6 +2,20 @@
 
 Itt történik az elkészült szoftver megvalósításának bemutatása, az előző fejezetben leírt terv szempontjai alapján.
 
+
+\section{Architektúra}
+
+Mielőtt elkezdenénk részletezni az egyes elemek konkrét realizációját, érdemes egy pillantást venni hogyan is áll össze az egész rendszer, amelyet az alábbi ábra nagyon jól szemléltet.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[scale=0.22]{images/architecture.png}
+    \caption{Az elkészült alkalmazás architektúrája}
+    \label{fig:rect}
+\end{figure}
+
+Nagyon jól látható a modularitás ami a rendszerben van, ugyanis bármilyen más kliens is képes lehet üzenetet küldeni a DosBoxban található szerverre, amennyiben tisztában van a lehetséges parancsokkal. Ez megkönnyíti a további alkalmazások készítését és a felhasználási területet is. Az is látszik hogy az egész Warcraftot lényegében körbe zárja a DosBox, így csak azon keresztül lehet vele interakcióba lépni. 
+
 \Section{DosBox}
 
 \subsection{Buildelés}
@@ -757,11 +771,19 @@ if(len(locations) > 0):
     
     \begin{python}
 def CombatPhase(self):
-for i in range(64):
-    for j in range(64):
-        if(self.map[2][i][j] == 100):
-            self.commands.append(f"Click 
-                        {self.ClickOnMinimap(i,j)}")
+
+    enemies = []
+    soldiers = []
+
+    for i in range(64):
+        for j in range(64):
+            if(self.map[1][i][j] == 1):
+                soldiers.append([i,j])
+            elif(self.map[2][i][j] == 100):
+                enemies.append(i,j)
+    if(len(enemies) > 0):
+        for soldier in soldiers:
+            self.commands.append(f"Attack {self.GetClickCoord(soldier[i],soldier[j],0)}")
 
     \end{python}
 
@@ -776,25 +798,15 @@ Felmerülhet ugyanakkor a kérdés, hogy mi történik hogy ha egy parancs már 
 
 \begin{python}
 if(len(self.commands) != 0):
-    self.socket.send(bytes(self.commands[0],'utf-8'))
-    self.commands.remove(self.commands[0])
-else:
-    self.socket.send(bytes(f"Skip",'utf-8'))
+    for command in self.commands:
+        self.socket.send(bytes(self.commands[0],'utf-8'))
+        self.commands.remove(self.commands[0])
+        message = self.socket.recv()
+        print(f"Received reply {message}")
 \end{python}
+\section{Stratégia}
 
-\section{Architektúra}
-
-Most hogy az egész rendszerről egy átfogó képet sikerült alkotni, érdemes egy pillantást venni hogyan is áll össze az egész rendszer, amelyet az alábbi ábra nagyon jól szemléltet.
-
-\begin{figure}[h]
-    \centering
-    \includegraphics[scale=0.22]{images/architecture.png}
-    \caption{Az elkészült alkalmazás architektúrája}
-    \label{fig:rect}
-\end{figure}
-
-Nagyon jól látható a modularitás ami a rendszerben van, ugyanis bármilyen más kliens is képes lehet üzenetet küldeni a DosBoxban található szerverre, amennyiben tisztában van a lehetséges parancsokkal. Ez megkönnyíti a további alkalmazások készítését és a felhasználási területet is. Az is látszik hogy az egész Warcraftot lényegében körbe zárja a DosBox, így csak azon keresztül lehet vele interakcióba lépni. 
-
+Nem követ bonyolult stratégiát a program, a mihamarabbi nyersanyag szerzésre és felfedezésre fekteti a hangsúlyt, inkább passzívan játszik a nyersanyagok felhalmozása érdekében. Mivel az ellenfél eléggé kiszámíthatatlan, gyakran kerül olyan helyzetbe az MI hogy felkészületlenül érik a támadások, ugyanakkor ha elég időt 
 \section{Limitációk}
 
 Sajnos mint minden programnak, ennek is megvannak a hátrányai. A fejlesztés során azt tapasztaltam, hogy a Dosboxon belül kiadott folytonos egymás után történi kattintás/billenytű parancs hatására némelyik akció "elveszlik". Lehetséges hogy ez egy beépített mechanizmus hogy a fals inputokat kiszűrje, van ehhez hasonló a kódban, de annak kivételekor az egész input rendszer működésképtelen, így a megkerülése lehetetlen.
