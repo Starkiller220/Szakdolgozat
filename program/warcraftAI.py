@@ -49,7 +49,7 @@ class WarcraftAI:
                 
                 template = cv2.imread(f"{unit.location}/{filename}",0)
                 w, h = template.shape[::-1]
-                for i in range(2):
+                for _ in ['after flip', 'before flip']:
                     template = cv2.flip(template,1)
                     res = cv2.matchTemplate(img_gray,template,cv2.TM_CCOEFF_NORMED)
                     threshold = unit.threshold
