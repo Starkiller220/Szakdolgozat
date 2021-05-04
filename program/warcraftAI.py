@@ -40,7 +40,7 @@ class WarcraftAI:
                 Unit(1,'./imgs/footman',(255,0,0),0.85,1),
                 Unit(1,'./imgs/peasant',(0,100,255),0.85,0),
                 Unit(1,'./imgs/buildings',(0,255,255),0.76,2),
-                Unit(2,'./imgs/tree',(19,69,139),0.8,1),
+                Unit(2,'./imgs/tree',(19,69,139),0.8,0),
                 Unit(1,'./imgs/road',(255,255,255),0.8,2)
                 ]
 
@@ -139,7 +139,6 @@ class WarcraftAI:
 
         i = random.randint(1,2)
         for peasant in peasants:
-            
             if(i % 2 == 0):
                 if( len(trees) > 0):
                     self.commands.append(f"Gather {self.GetClickCoord(peasant[0],peasant[1],1)} { self.GetClickCoord(trees[0][0],trees[0][1],0)}")
@@ -162,7 +161,7 @@ class WarcraftAI:
                 if(self.map[1][i][j] == 1):
                     soldiers.append([i,j])
         if(len(soldiers) > 0):
-            self.MoveUnitUnexplored(soldiers[0][0]+1,soldiers[0][1]+0)
+            self.MoveUnitUnexplored(soldiers[0][0]+0,soldiers[0][1]+0)
 
 
     def MoveUnitUnexplored(self,x,y):
@@ -192,7 +191,6 @@ class WarcraftAI:
                 if(self.map[0][i][j] == 1):
                     peasants.append([i,j])
                 if(i < 62 and j < 62 and self.map[1][i][j] == 0 and self.map[1][i+1][j] == 0 and self.map[1][i][j+1] == 0 and self.map[1][i+1][j+1] == 0 ):
-                    print(f"jó: {[j,i]}")
                     
                     road = False
                     building = False
@@ -245,7 +243,7 @@ class WarcraftAI:
         if(len(locations) > 0):
             for peasant in peasants:
                     print(locations[0])
-                    self.commands.append(f"Build {self.GetClickCoord(peasant[0],peasant[1],1)} 50 130 {self.GetClickCoord(locations[0][1],locations[0][0],0)}")
+                    self.commands.append(f"Build {self.GetClickCoord(peasant[1],peasant[0],1)} 50 130 {self.GetClickCoord(locations[0][1],locations[0][0],0)}")
 
 
     def TrainPhase(self):
@@ -259,10 +257,19 @@ class WarcraftAI:
 
 
     def CombatPhase(self):
+
+        enemies = []
+        soldiers = []
+
         for i in range(64):
             for j in range(64):
-                if(self.map[2][i][j] == 100):
-                    self.commands.append(f"Click {self.ClickOnMinimap(i,j)}")
+                if(self.map[1][i][j] == 1):
+                    soldiers.append([i,j])
+                elif(self.map[2][i][j] == 100):
+                    enemies.append(i,j)
+
+        for soldier in soldiers:
+            self.commands.append(f"Attack {self.GetClickCoord(soldier[i],soldier[j],0)}")
 
     def GetClickCoord(self,x,y,z):
         x -= self.offset[0]+z
@@ -273,9 +280,13 @@ class WarcraftAI:
     def ClickOnMinimap(self,x,y):
         return (f"{2*x+6} {y+6}")
 
-    def NextStage(self):
+    def NextStage(self,crop_map):  
         self.stage += 1
         if self.stage > 5:
+            try:
+                self.getValidLocations(crop_map)
+            except: 
+                pass
             self.stage = 0  
 
     def getValidLocations(self,cropmap):
@@ -286,11 +297,16 @@ class WarcraftAI:
                 found = False
                 if list(cropmap[i][j]) == [0,199,0]:                
                     for location in locations:
-                        if ( (location[0] + 6 > j or location[1] + 6 > i) or (location[0] - 6 > j or location[1] - 6 > i)):
+                        if ( (location[0] + 7 > j or location[1] - 7 > i) or (location[0] + 7 > j or location[1] - 7 > i)):
                             found = True
                             break
                     if not found:
                         locations.append([i,j])
+        try:
+            randloc = locations[random.randint(0,len(locations)-1)]
+            self.commands.append(f"Click {self.ClickOnMinimap(randloc[1],randloc[0])}")
+        except:
+            pass
 
 
         print(f"locations: {locations}")
@@ -320,7 +336,7 @@ class WarcraftAI:
             
             self.UpdateMap(image[6:70,3:67])
             self.match_templates(image[12:188,72:312])
-            self.getValidLocations(image[6:70,3:67])
+            
             if(self.stage == 0):           
                 pass
                 self.GatherPhase()
@@ -331,22 +347,23 @@ class WarcraftAI:
                 pass
                 self.TrainPhase()
             elif(self.stage == 3):
+                pass
                 self.BuildPhase()
             elif(self.stage == 4):
                 pass
                 self.CombatPhase()
             
             if(len(self.commands) != 0):
-                self.socket.send(bytes(self.commands[0],'utf-8'))
-                self.commands.remove(self.commands[0])
-            else:
-                self.socket.send(bytes(f"Skip",'utf-8'))
+                for command in self.commands:
+                    self.socket.send(bytes(self.commands[0],'utf-8'))
+                    self.commands.remove(self.commands[0])
+                    message = self.socket.recv()
+                    print(f"Received reply {message}")
 
             #self.socket.send(bytes(f"Click {6+128} {6+64}",'utf-8'))
 
-            self.NextStage()
-            message = self.socket.recv()
-            print(f"Received reply {message}")
+            self.NextStage(image[6:70,3:67])
+            
             self.map[0] = np.zeros(shape=(64,64))
             self.map[2] = np.zeros(shape=(64,64))
             
