@@ -548,36 +548,38 @@ Ehhez egy \textit{Unit} segédosztály hozunk létre, ami megadja az általános
 \begin{python}
 
 class Unit:
-    def __init__(self,location,color,threshold,mapmode,_id):
+    def __init__(self,unit_id,location,color,threshold,mapmode):
         self.location = location
         self.color = color
         self.threshold = threshold
         self.mapmode = mapmode
-        self.id = _id
+        self.unit_id = unit_id
 \end{python}
 
 Mint látható egy nagyon egyszerű, csak konstruktort tartalmazó osztályról van szó, aminek pusztán annyi lényege van, hogy a könnyebb kezelhetőség érdekében "csomagba" rakja egy adott objektumra vonatkozó összes hasznos adatot.
 
 Az adattakok jelentései a következők:
 \begin{itemize}
+    \item \textit{unit id:} Megadja az egyedi azonosítót
     \item \textit{location:} Az a hely, ahol az adott objektum spritejai vannak.
     \item \textit{color:} A keret színét adja meg
     \item \textit{threshold:} Megadja a hibahatár mértékét. 
     \item \textit{mapmode:} Megadja melyik térképre akarjuk menteni 
-    \item \textit{id:}  Megadja az egyedi azonosítót
+    
 \end{itemize}
 
 Így ezt az osztályt a következő lépésben használhatjuk. Ennek a lépésnek a lényege konkrétan meghatározni hogy mit is látunk a játéktéren. Ezt egyfajta \textit{template matching}-el hajtjuk végre, melynek kódja a következő:
 
 \begin{python}
-def TemplateMatching(self,playArea):
-    img_gray = cv2.cvtColor(playArea, cv2.COLOR_BGR2GRAY)
+def match_templates(self,play_area):
+    img_gray = cv2.cvtColor(play_area, cv2.COLOR_BGR2GRAY)
 
     units = [
-            Unit('./imgs/footman',(255,0,0),0.85,1,1),
-            Unit('./imgs/peasant',(0,100,255),0.85,0,1),
-            Unit('./imgs/buildings',(0,255,255),0.76,2,1),
-            Unit('./imgs/tree',(19,69,139),0.8,0,2)
+            Unit(1,'./imgs/footman',(255,0,0),0.85,1),
+            Unit(1,'./imgs/peasant',(0,100,255),0.85,0),
+            Unit(1,'./imgs/buildings',(0,255,255),0.76,2),
+            Unit(2,'./imgs/tree',(19,69,139),0.8,1),
+            Unit(1,'./imgs/road',(255,255,255),0.8,2)
             ]
 
     for unit in units:
@@ -585,16 +587,17 @@ def TemplateMatching(self,playArea):
             
             template = cv2.imread(f"{unit.location}/{filename}",0)
             w, h = template.shape[::-1]
-            for i in range(2):
+            for _ in ['after flip', 'before flip']:
                 template = cv2.flip(template,1)
                 res = cv2.matchTemplate(img_gray,template,
-                                    cv2.TM_CCOEFF_NORMED)
+                cv2.TM_CCOEFF_NORMED)
                 threshold = unit.threshold
                 loc = np.where( res >= threshold)
 
                 for pt in zip(*loc[::-1]):
                     if self.offset != None:
-                        if(unit.mapmode == 2):
+                        if(unit.mapmode == 2 and 
+                            unit.location == './imgs/buildings'):
                             try:
                                 self.map[unit.mapmode][self.offset[0]+
                                 math.ceil(pt[1] / 16)][self.offset[1]+
@@ -606,12 +609,12 @@ def TemplateMatching(self,playArea):
                             try:
                                 self.map[unit.mapmode][self.offset[0]+
                                 math.ceil(pt[1] / 16)][self.offset[1]+
-                                math.ceil(pt[0] / 16)] = unit.id
+                                math.ceil(pt[0] / 16)] = unit.unit_id
                             except:
                                 pass
-                    cv2.rectangle(playArea, pt, (pt[0] + w, pt[1] + h),
-                                  unit.color, 2)
-                    cv2.imwrite('res.png',playArea)
+                    cv2.rectangle(play_area, pt, (pt[0] + w, pt[1] + h),
+                                unit.color, 2)
+                    cv2.imwrite('res.png',play_area)
 \end{python}
 
 Ismerős elemeket láthatunk a függvény elején, a képet szokás szerint szürkeárnyalatossá kell konvártálni, majd egy \textit{units} nevű listába példányosítjuk a szükséges objektumokat. Itt megjegyzendő, hogy a \textit{color} adattag fordított rgb sorrendben működik, a \textit{threshold} lényege pedig hogy hány százalékos legyen az egyezes (értelem szerűen 0 és 1 közötti értéket fogad el).
@@ -681,6 +684,7 @@ def GatherPhase(self):
 \end{python}
 
 \item \textbf{Felfedezés}
+
 Ez a fázis magától értetődő, itt a játéktéren látható katonákat küldjük el felfedezni egy véletlenszerű koordinátára.
  \begin{python}
 def ExplorePhase(self):
@@ -750,6 +754,16 @@ if(len(locations) > 0):
     Az építés azt az elvet követi, miszerint minden épület köré kell legalább egy út, továbbá az épület körüli két mezőben legalább egy másik épület. Nem bonyolult szabály, ugyanakkor ez a program legsebezhetőbb része, ugyanis a kalkulációk és a sok kattintás parancs miatt nem mindig sikerül véghezvinni az építési parancsot. Mivel az algoritmus jó, ez egyértelműen a Dosbox limitációjának tudható be.
 
     \item \textbf{Harc}
+    
+    \begin{python}
+def CombatPhase(self):
+for i in range(64):
+    for j in range(64):
+        if(self.map[2][i][j] == 100):
+            self.commands.append(f"Click 
+                        {self.ClickOnMinimap(i,j)}")
+
+    \end{python}
 
 \end{enumerate}
 
@@ -768,10 +782,61 @@ else:
     self.socket.send(bytes(f"Skip",'utf-8'))
 \end{python}
 
+\section{Architektúra}
+
+Most hogy az egész rendszerről egy átfogó képet sikerült alkotni, érdemes egy pillantást venni hogyan is áll össze az egész rendszer, amelyet az alábbi ábra nagyon jól szemléltet.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[scale=0.22]{images/architecture.png}
+    \caption{Az elkészült alkalmazás architektúrája}
+    \label{fig:rect}
+\end{figure}
+
+Nagyon jól látható a modularitás ami a rendszerben van, ugyanis bármilyen más kliens is képes lehet üzenetet küldeni a DosBoxban található szerverre, amennyiben tisztában van a lehetséges parancsokkal. Ez megkönnyíti a további alkalmazások készítését és a felhasználási területet is. Az is látszik hogy az egész Warcraftot lényegében körbe zárja a DosBox, így csak azon keresztül lehet vele interakcióba lépni. 
+
 \section{Limitációk}
 
 Sajnos mint minden programnak, ennek is megvannak a hátrányai. A fejlesztés során azt tapasztaltam, hogy a Dosboxon belül kiadott folytonos egymás után történi kattintás/billenytű parancs hatására némelyik akció "elveszlik". Lehetséges hogy ez egy beépített mechanizmus hogy a fals inputokat kiszűrje, van ehhez hasonló a kódban, de annak kivételekor az egész input rendszer működésképtelen, így a megkerülése lehetetlen.
 
 Ezt úgy sikerült kiküszöbölni, hogy "fékeket" építettem a kattintós parancsok közé, továbbá saját függvényt írtam hozzá.
 
-Ezzel sikerült a negatív hatást csökkenteni, ugyanakkor olykor-olykor előfordul, amiből az MI nehezen, vagy szinte sehogysem épül fel. A program futását nem akadályozza, nem áll le, de ilyenkor célszerű a játékot manuálisan újra indítani ha egy látványosabb végigjátszást akar az ember. Ugyanakkor ez a módszer teret adhat más emulátorok kezelésének automatizálására (pl.: videojáték konzolok) és amennyiben ott ezek a problémák nem merülnek fel, az eredményt hatványozottan javítani lehet.
+\begin{cpp}
+void Mouse_Click(float x, float y) {
+    mouse.x = x;
+    mouse.y = y;
+    DrawCursor();
+    
+    Sleep(100);
+    Mouse_AddEvent(MOUSE_LEFT_RELEASED);
+    Mouse_AddEvent(MOUSE_LEFT_PRESSED);
+    Mouse_AddEvent(MOUSE_LEFT_RELEASED);   
+}
+\end{cpp}
+
+Fentebb látható a saját kattintó függvényem, amelyben látszik az 1 tized másodpercnyi késleltetés. Ugyanakkor a parancsok között is szükséges ez a késleltetés hogy a lehető legnagyobb arányban jöjjön létre az összes parancs.
+
+\begin{cpp}
+else if (result[0] == "Move")
+{
+    Mouse_Click(stof(result[1]), stof(result[2]));
+    Sleep(100);
+    Mouse_Click(50, 130);
+    Sleep(100);
+    Mouse_Click(stof(result[3]), stof(result[4]));
+    Sleep(100);
+    Mouse_Click(70, 80);
+    Sleep(100);
+    KEYBOARD_AddKey(KBD_leftctrl, 1);	
+    Mouse_Click(stof(result[1]), stof(result[2]));
+    Sleep(100);
+    Mouse_Click(stof(result[1]), stof(result[2]));
+    Mouse_Click(stof(result[1]), stof(result[2]));
+    Sleep(250);
+    KEYBOARD_AddKey(KBD_leftctrl, 0);
+}
+\end{cpp}
+
+Ebben a kódrészben az látszik hogy a késleltetés ettől függetlenül még a kattintások között is fennál. Felmerülhet ugyan a kérdés, hogy akkor miért nem egyszerűbb szimplán növelni a függvényen belüli várakozási időt? A kérdés nagyon is jó, de a válasz egyszerű, nem mindenhol szükséges ez a "fék", továbbá nem mindenhol ugyan akkora mértékkel történik ez meg. Látható például hogy gombnyomás esetén teljesen más az érték. Ennek meghatározása sajnos csak próbálkozások útján lehetséges, és biztos vagyok benne hogy lehetséges még javítani a jelenlegi eredményen, ugyanakkor szerintem már így is hibahatáron belül van.
+
+Ezzel a módszerrel tehát sikerült a negatív hatást csökkenteni, ugyanakkor olykor-olykor előfordul, amiből az MI nehezen, vagy szinte sehogysem épül fel. A program futását nem akadályozza, nem áll le, de ilyenkor célszerű a játékot manuálisan újra indítani ha egy látványosabb végigjátszást akar az ember. Ugyanakkor ez a módszer teret adhat más emulátorok kezelésének automatizálására (pl.: videojáték konzolok) és amennyiben ott ezek a problémák nem merülnek fel, az eredményt hatványozottan javítani lehet.
