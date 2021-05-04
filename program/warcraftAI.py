@@ -33,15 +33,15 @@ class WarcraftAI:
         self.loop = False
         self.socket.close()
 
-    def TemplateMatching(self,playArea):
-        img_gray = cv2.cvtColor(playArea, cv2.COLOR_BGR2GRAY)
+    def match_templates(self,play_area):
+        img_gray = cv2.cvtColor(play_area, cv2.COLOR_BGR2GRAY)
 
         units = [
-                Unit('./imgs/footman',(255,0,0),0.85,1,1),
-                Unit('./imgs/peasant',(0,100,255),0.85,0,1),
-                Unit('./imgs/buildings',(0,255,255),0.76,2,1),
-                Unit('./imgs/tree',(19,69,139),0.8,1,2),
-                Unit('./imgs/road',(255,255,255),0.8,2,1)
+                Unit(1,'./imgs/footman',(255,0,0),0.85,1),
+                Unit(1,'./imgs/peasant',(0,100,255),0.85,0),
+                Unit(1,'./imgs/buildings',(0,255,255),0.76,2),
+                Unit(2,'./imgs/tree',(19,69,139),0.8,1),
+                Unit(1,'./imgs/road',(255,255,255),0.8,2)
                 ]
 
         for unit in units:
@@ -67,8 +67,8 @@ class WarcraftAI:
                                     self.map[unit.mapmode][self.offset[0]+math.ceil(pt[1] / 16)][self.offset[1]+math.ceil(pt[0] / 16)] = unit.id
                                 except:
                                     pass
-                        cv2.rectangle(playArea, pt, (pt[0] + w, pt[1] + h), unit.color, 2)
-                        cv2.imwrite('res.png',playArea)
+                        cv2.rectangle(play_area, pt, (pt[0] + w, pt[1] + h), unit.color, 2)
+                        cv2.imwrite('res.png',play_area)
                     
 
         
@@ -319,7 +319,7 @@ class WarcraftAI:
 
             
             self.UpdateMap(image[6:70,3:67])
-            self.TemplateMatching(image[12:188,72:312])
+            self.match_templates(image[12:188,72:312])
             self.getValidLocations(image[6:70,3:67])
             if(self.stage == 0):           
                 pass
@@ -354,9 +354,9 @@ class WarcraftAI:
             time.sleep(1)
 
 class Unit:
-    def __init__(self,location,color,threshold,mapmode,_id):
+    def __init__(self,unit_id,location,color,threshold,mapmode):
         self.location = location
         self.color = color
         self.threshold = threshold
         self.mapmode = mapmode
-        self.id = _id
+        self.unit_id = unit_id
