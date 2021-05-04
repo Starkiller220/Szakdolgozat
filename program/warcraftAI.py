@@ -64,7 +64,7 @@ class WarcraftAI:
                                     pass
                             else:
                                 try:
-                                    self.map[unit.mapmode][self.offset[0]+math.ceil(pt[1] / 16)][self.offset[1]+math.ceil(pt[0] / 16)] = unit.id
+                                    self.map[unit.mapmode][self.offset[0]+math.ceil(pt[1] / 16)][self.offset[1]+math.ceil(pt[0] / 16)] = unit.unit_id
                                 except:
                                     pass
                         cv2.rectangle(play_area, pt, (pt[0] + w, pt[1] + h), unit.color, 2)
