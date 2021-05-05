@@ -267,9 +267,9 @@ class WarcraftAI:
                     soldiers.append([i,j])
                 elif(self.map[2][i][j] == 100):
                     enemies.append(i,j)
-
-        for soldier in soldiers:
-            self.commands.append(f"Attack {self.GetClickCoord(soldier[i],soldier[j],0)}")
+        if(len(enemies) > 0):
+            for soldier in soldiers:
+                self.commands.append(f"Attack {self.GetClickCoord(soldier[i],soldier[j],0)}")
 
     def GetClickCoord(self,x,y,z):
         x -= self.offset[0]+z
