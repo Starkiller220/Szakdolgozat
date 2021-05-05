@@ -5,7 +5,7 @@ Itt történik az elkészült szoftver megvalósításának bemutatása, az elő
 
 \section{Architektúra}
 
-Mielőtt elkezdenénk részletezni az egyes elemek konkrét realizációját, érdemes egy pillantást venni hogyan is áll össze az egész rendszer, amelyet az alábbi ábra nagyon jól szemléltet.
+Mielőtt elkezdenénk részletezni az egyes elemek konkrét realizációját, érdemes egy pillantást venni hogyan is áll össze az egész rendszer, amelyet az alábbi ábra nagyon jól szemléltet. 
 
 \begin{figure}[h]
     \centering
@@ -13,8 +13,10 @@ Mielőtt elkezdenénk részletezni az egyes elemek konkrét realizációját, é
     \caption{Az elkészült alkalmazás architektúrája}
     \label{fig:rect}
 \end{figure}
+Az üzenetek amiket a ZeroMQ kliens küld azok lényegében azt tartalmazzák hogy hova kell kattintani. 
+Vannak "atomi" parancsok, például a sima \textit{click} parancs, ugyanakkor léteznek bonyolultabbak, mint a \textit{geather}, ami több atomi utasításból áll. Természetesen minden parancshoz meg kell adni a kattintás pontos koordinátáját, összetett parancsnál többet is. Ez azért is jó mert elméletileg minden bonyolultabb utasítás megoldható atomi utasításokkal, ugyanakkor a teljesítmény növelése érdekében lettek létrehozva az összetett utasítások, mert az egyetlen egy adatküldés során létrejön, míg külön külön küldve ez sokkal több.
 
-Nagyon jól látható a modularitás ami a rendszerben van, ugyanis bármilyen más kliens is képes lehet üzenetet küldeni a DosBoxban található szerverre, amennyiben tisztában van a lehetséges parancsokkal. Ez megkönnyíti a további alkalmazások készítését és a felhasználási területet is. Az is látszik hogy az egész Warcraftot lényegében körbe zárja a DosBox, így csak azon keresztül lehet vele interakcióba lépni. 
+Továbbá nagyon jól látható a modularitás ami a rendszerben van, ugyanis bármilyen más kliens is képes lehet üzenetet küldeni a DosBoxban található szerverre, amennyiben tisztában van a lehetséges parancsokkal. Ez megkönnyíti a további alkalmazások készítését és a felhasználási területet is. Az is látszik hogy az egész Warcraftot lényegében körbe zárja a DosBox, így csak azon keresztül lehet vele interakcióba lépni. 
 
 \Section{DosBox}
 
@@ -783,7 +785,8 @@ def CombatPhase(self):
                 enemies.append(i,j)
     if(len(enemies) > 0):
         for soldier in soldiers:
-            self.commands.append(f"Attack {self.GetClickCoord(soldier[i],soldier[j],0)}")
+            self.commands.append(f"Attack 
+                    {self.GetClickCoord(soldier[i],soldier[j],0)}")
 
     \end{python}
 
@@ -806,7 +809,13 @@ if(len(self.commands) != 0):
 \end{python}
 \section{Stratégia}
 
-Nem követ bonyolult stratégiát a program, a mihamarabbi nyersanyag szerzésre és felfedezésre fekteti a hangsúlyt, inkább passzívan játszik a nyersanyagok felhalmozása érdekében. Mivel az ellenfél eléggé kiszámíthatatlan, gyakran kerül olyan helyzetbe az MI hogy felkészületlenül érik a támadások, ugyanakkor ha elég időt 
+Nem követ bonyolult stratégiát a program, a mihamarabbi nyersanyag szerzésre és felfedezésre fekteti a hangsúlyt, inkább passzívan játszik a nyersanyagok felhalmozása érdekében. Mivel az ellenfél eléggé kiszámíthatatlan, gyakran kerül olyan helyzetbe az MI hogy felkészületlenül érik a támadások, ugyanakkor ha elég idő van rá képes lehet a felzárkózásra.
+
+Első lépésként megpróbál nyersanyagokat gyűjteni, a fával általában könnyű dolga van, mert közel szokott lenni a kezdéshez, ámbár előfordul hogy nincs, ebben az esetben elküldi a parasztokat felfedezni. Az aranybányák miatt muszáj ez a felfedezés, és kritikus pont is, mert ha nem talál az MI időben egyet, akkor hatalmas hátrányból indul. 
+Következő lépés a leírtak szerint a katonákkal kell kezdeni valamit, ami "békeidőben" felfedezést takar, ellenség esetén megpróbálja az mi a lehető legnagyobb haderőt az ellenséges egységekre irányítani.  
+
+Ezek után a kiképzés következik, ami az elérhető épületektől függ, a városházán parasztokat képez, míg a katonai épületekben katonákat képez ki.
+
 \section{Limitációk}
 
 Sajnos mint minden programnak, ennek is megvannak a hátrányai. A fejlesztés során azt tapasztaltam, hogy a Dosboxon belül kiadott folytonos egymás után történi kattintás/billenytű parancs hatására némelyik akció "elveszlik". Lehetséges hogy ez egy beépített mechanizmus hogy a fals inputokat kiszűrje, van ehhez hasonló a kódban, de annak kivételekor az egész input rendszer működésképtelen, így a megkerülése lehetetlen.
