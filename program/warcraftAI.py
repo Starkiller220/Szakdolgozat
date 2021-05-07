@@ -176,7 +176,6 @@ class WarcraftAI:
                         if (random.randint(0,165) == 1):
                             exitfor = True
                             break
-            print(f"a: {target}")
             self.commands.append(f"Move {self.GetClickCoord(x,y,1)} { self.ClickOnMinimap(target[0],target[1]) }")
 
     def BuildPhase(self):
@@ -239,10 +238,8 @@ class WarcraftAI:
                     if(road and building):
                         locations.append([j,i])
            
-        print(len(locations))
         if(len(locations) > 0):
             for peasant in peasants:
-                    print(locations[0])
                     self.commands.append(f"Build {self.GetClickCoord(peasant[1],peasant[0],1)} 50 130 {self.GetClickCoord(locations[0][1],locations[0][0],0)}")
 
 
@@ -250,7 +247,6 @@ class WarcraftAI:
         for i in range(64):
             for j in range(64):
                 if(self.map[2][i][j] == 1):
-                    print([i,j])
                     self.commands.append(f"Click {self.GetClickCoord(i,j,-1)}")
                     self.commands.append(f"Click 30 120")
                     return

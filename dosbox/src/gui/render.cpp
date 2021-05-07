@@ -164,7 +164,7 @@ void ZeroMQLoop()
 
 		//  Send reply back to client
 		zmq::message_t reply(5);
-		memcpy(reply.data(), "World", 5);
+		memcpy(reply.data(), "Received", 8);
 		
 		socket.send(reply);
 	}
