@@ -1,11 +1,10 @@
-\Chapter{Megvalósítás}
+\Chapter{A gépi játékos megvalósítása}
 
 Itt történik az elkészült szoftver megvalósításának bemutatása, az előző fejezetben leírt terv szempontjai alapján.
 
+\Section{Architektúra}
 
-\section{Architektúra}
-
-Mielőtt elkezdenénk részletezni az egyes elemek konkrét realizációját, érdemes egy pillantást venni hogyan is áll össze az egész rendszer, amelyet az alábbi ábra nagyon jól szemléltet. 
+Mielőtt elkezdenénk részletezni az egyes elemek konkrét realizációját, érdemes egy pillantást venni, hogy hogyan is áll össze az egész rendszer, amelyet \aref{fig:rect}. ábra szemléltet. 
 
 \begin{figure}[h]
     \centering
@@ -13,18 +12,20 @@ Mielőtt elkezdenénk részletezni az egyes elemek konkrét realizációját, é
     \caption{Az elkészült alkalmazás architektúrája}
     \label{fig:rect}
 \end{figure}
-Az üzenetek amiket a ZeroMQ kliens küld azok lényegében azt tartalmazzák hogy hova kell kattintani. 
-Vannak "atomi" parancsok, például a sima \textit{click} parancs, ugyanakkor léteznek bonyolultabbak, mint a \textit{geather}, ami több atomi utasításból áll. Természetesen minden parancshoz meg kell adni a kattintás pontos koordinátáját, összetett parancsnál többet is. Ez azért is jó mert elméletileg minden bonyolultabb utasítás megoldható atomi utasításokkal, ugyanakkor a teljesítmény növelése érdekében lettek létrehozva az összetett utasítások, mert az egyetlen egy adatküldés során létrejön, míg külön külön küldve ez sokkal több.
 
-Továbbá nagyon jól látható a modularitás ami a rendszerben van, ugyanis bármilyen más kliens is képes lehet üzenetet küldeni a DosBoxban található szerverre, amennyiben tisztában van a lehetséges parancsokkal. Ez megkönnyíti a további alkalmazások készítését és a felhasználási területet is. Az is látszik hogy az egész Warcraftot lényegében körbe zárja a DosBox, így csak azon keresztül lehet vele interakcióba lépni. 
+Az üzenetek amiket a ZeroMQ kliens küld, azok lényegében azt tartalmazzák, hogy hova kell kattintani. 
+Vannak "atomi" parancsok, például a sima \textit{click} parancs, ugyanakkor léteznek bonyolultabbak, mint a \textit{geather}, ami több atomi utasításból áll. Természetesen minden parancshoz meg kell adni a kattintás pontos koordinátáját, összetett parancsnál többet is. Ez azért is jó mert elméletileg minden bonyolultabb utasítás megoldható atomi utasításokkal, ugyanakkor a teljesítmény növelése érdekében lettek létrehozva az összetett utasítások, mert az egyetlen egy adatküldés során létrejön, míg külön-külön küldve ez sokkal több.
+
+Nagyon jól látható a modularitás ami a rendszerben van, ugyanis bármilyen más kliens is képes lehet üzenetet küldeni a DosBox-ban található szerverre, amennyiben tisztában van a lehetséges parancsokkal. Ez megkönnyíti a további alkalmazások készítését, és a felhasználási területet is. Az is látszik, hogy az egész Warcraft-ot lényegében körbe zárja a DosBox, így csak azon keresztül lehet vele interakcióba lépni. 
 
 \Section{DosBox}
 
-\subsection{Buildelés}
-Első lépésként a forráskódot kell beszerezni, ez a beszerzés időpontjában elérhető legfrissebb verzióban történt meg, a további frissítése új verziókra csak abban az esetben indokolt ha kritikus hibát találok a fejlesztés során, egyébként csak komplikációk adódnának miatta.
+\SubSection{Buildelés}
+
+Első lépésként a forráskódot kell beszerezni, ez a fejlesztés ideje alatt elérhető legfrissebb verzióban történt meg. (A további frissítése új verziókra csak abban az esetben indokolt ha kritikus hibát találok a fejlesztés során, egyébként csak komplikációk adódnának miatta.)
 % ref: https://sourceforge.net/p/dosbox/code-0/4392/tree/dosbox/
 
-A következő lépés a beszerzett forráskód buildelése. Mivel jelenleg a Windowst használom gyakrabban, így a DosBox buildelése, és a mesterséges intelligencia is Windows alatt fog készülni. Nem lehetetlen hogy Linux alatt is elindulni mind a Dosbox, mind az MI, de a szakdolgazat nem foglalkozik erre az operációs rendszerre történő optimalizálásra.
+A következő lépés a beszerzett forráskód buildelése. Mivel jelenleg a Windows-t használom gyakrabban, így a DosBox buildelése, és a mesterséges intelligencia is Windows alatt készült. Nem kizárt, hogy Linux alatt is elinduljon mind a DosBox, mind az MI, de a szakdolgazat nem foglalkozik erre az operációs rendszerre történő optimalizálással.
 % ref: https://www.dosbox.com/wiki/Building_DOSBox_with_Visual_Studio
 
 Ha megpróbálnánk így lefordítani, azonnal hibába ütköznénk, ugyanis szükségesek hozzá különböző könyvtárak.
@@ -68,17 +69,16 @@ Utolsó dolgunk átírni a \textit{config.h} nevű fájlban az alábbi konfigur�
     ...
 \end{cpp}
 
-\subsection{DosBox átalakítása - bemenetek}
+\SubSection{DosBox átalakítása - bemenetek}
 
 Ahhoz hogy a tervben leírtakat meg tudjuk valósítani, meg kell találnuk a számunkra fontos kódrészeket. Ezek sorrendtől függetlenül a következők:
-
 \begin{itemize}
-    \item Egér 
-    \item Billentyűzet
-    \item Képernyőkép
+    \item egér,
+    \item billentyűzet,
+    \item képernyőkép.
 \end{itemize}
 
-A fájlok közül rákereshetünk hogy tartalmazza-e valamelyik a keyboard vagy mouse kulcsszavatak. Ezekre rákeresve találunk 2 fájlt ami számunkra érdekes lehet. Az egyik a \textit{keyboard.h} a másik a \textit{mouse.h}.
+A fájlok közül rákereshetünk hogy tartalmazza-e valamelyik a \textit{keyboard} vagy \textit{mouse} kulcsszavatak. Ezekre rákeresve találunk 2 fájlt ami számunkra érdekes lehet. Az egyik a \textit{keyboard.h} a másik a \textit{mouse.h}.
 
 Így néz ki például a \textit{keyboard.h} header fájl:
 
@@ -108,14 +108,14 @@ A fájlok közül rákereshetünk hogy tartalmazza-e valamelyik a keyboard vagy 
     #endif
 \end{cpp}
 
-Látható hogy a különböző billentyűk egy enumban vannak tárolva, általános alakját tekintve \textit{KBD\_KEY}.
+Látható, hogy a különböző billentyűk egy felsorolásban (\textit{enum}) vannak tárolva, általános alakját tekintve \textit{KBD\_KEY}.
 Továbbá a fájl végén található egy függvény fejléce:
 
 \begin{cpp}
     void KEYBOARD_AddKey(KBD_KEYS keytype,bool pressed);
 \end{cpp}
 
-Itt látható hogy ez a függvény paraméterbe kér egy billentyűt, a fentebb látott enumból, majd egy igaz/hamis értéket, hogy le van-e nyomva avagy sem. Ebből tisztán látszik, hogy amennyiben meghívjuk ezt a függvényt egy gombra igaz paraméterre, majd közvetenül utána hamissal, gomblenyomást tudunk szimulálni kódon belül. 
+Itt látható, hogy ez a függvény paraméterbe kér egy billentyűt, a fentebb látott enum-ból, majd egy igaz/hamis értéket, hogy le van-e nyomva avagy sem. Ebből tisztán látszik, hogy amennyiben meghívjuk ezt a függvényt egy gombra igaz paraméterre, majd közvetenül utána hamissal, gomblenyomást tudunk szimulálni kódon belül. 
 
 Ezzel a billentyűzethez hozzá tudunk férni igen egyszerűen, következhet is az egér, amelyet a \textit{mouse.h} header fájlban találunk.
 
@@ -188,17 +188,15 @@ Vegyük például a gomb lenyomásához tartozó függvényt:
 
 \end{cpp}
 
-Látható hogy annak fügvényében hogy mennyi gomb található az egéren (alapértelmezetten 3), az alapján engedélyez különböző eseteket a program. Alapértelmezett esetben az alábbiakra tudunk következtetni:
-
+Látható, hogy annak fügvényében, hogy mennyi gomb található az egéren (alapértelmezetten 3), az alapján engedélyez különböző eseteket a program. Alapértelmezett esetben az alábbiakra tudunk következtetni:
 \begin{itemize}
-    \item Ha a \textit{button} paraméter értéke 0, az a bal egérgombnak felel meg
-    \item Amennyiben az értéke 1, akkor az a jobb egérgomb
-    \item Amennyiben az érték 2, akkor az a görgő lenyomása
+    \item ha a \textit{button} paraméter értéke 0, az a bal egérgombnak felel meg,
+    \item amennyiben az értéke 1, akkor az a jobb egérgomb,
+    \item amennyiben az érték 2, akkor az a görgő lenyomása.
 \end{itemize}
-
 Ezt kombinálva a gomb eleresztésével láthatóvá válik, hogy ugyan úgy képesek vagyunk kattintani 2 függvény meghívásával, mint ahogyan ezt a billentyűzetnél tettük.
 
-\subsection{Dosbox átalakítása - képernyőkép}
+\SubSection{Dosbox átalakítása - képernyőkép}
 
 További fontos, ugyanakkor nehezebb probléma a képernyő képének lementése. Első lépésként meg kell találni a az ehhez szükséges függvényt vagy függvényeket. 
 A \textit{screenshot} szóra rákeresve a fájlok között a \textit{hardware.cpp}-ben találunk egy\\ \verb|CAPTURE_ScreenShotEvent| nevű függvényt, ugyanakkor ez nem paraméterezhető megfeleően, csak egy igaz/hamis értéket lehet megadni benne. 
@@ -207,7 +205,6 @@ Tovább böngészve ugyan ebben a fájlban megtalálhatjuk a \verb|CAPTURE_AddIm
 Ezek után olyan részt kell találni a kódban, ahol periodikusan lehet futtatni az általunk megírt logika alapján a kép lementését anélkül, hogy lassítanánk a szoftver futását. Erre hosszadalmas keresés után a \textit{render.cpp} \verb|RENDER_EndUpdate| függvénye tűnik alkalmasnak, mivel ez a függvény minden frame végén lefut. 
 A függvény végét az alábbi kóddal bővítettem ki:
 \begin{cpp}
-
     if(1)
     {
         ...
@@ -228,160 +225,144 @@ A függvény végét az alábbi kóddal bővítettem ki:
             fpsCounter++;
         } 
     }
-
-    
-
 \end{cpp}
 Ennek a lényege, hogy létrehozunk egy belső FPS számlálót, és minden frameben összehasonlítjuk az elvárt FPS-el, amennyiben ezt elértük vagy túlhaladtunk rajta, lementjük a képernyő jelenlegi tartalmát.
 Ezzel technikailag másodpercenként lehet képernyőképet csinálni. Ezzel a módszerrel ez a lehető legrövidebb intervallum.
-\subsection{Dosbox átalakítása - ZeroMQ}
+
+\SubSection{Dosbox átalakítása - ZeroMQ}
 
 Miután elkészült a képernyőkép bizonyos időközönkénti mentése, egy újabb nehezebb feladat következik. Implementálnunk kell a tervben leírt processzek közötti kommunikációt. 
 Erre a már szintén említett \textit{ZeroMQ} lesz a segítségünkre, amit először tesztelnünk kell C++ban és Pythonban egyaránt.
 
 Mielőtt konkrétan beágyaznánk bármiféle kódot a DosBoxba, nézzük meg hogyan is működik egy egszerű \textit{request-reply} alapján.
-
 \begin{python}
+import zmq
+import time
 
-    import zmq
-    import time
+context = zmq.Context()
 
-    context = zmq.Context()
+#  create socket
+print("Connecting to server...")
+socket = context.socket(zmq.REQ)
+socket.connect("tcp://localhost:5555")
 
-    #  create socket
-    print("Connecting to server...")
-    socket = context.socket(zmq.REQ)
-    socket.connect("tcp://localhost:5555")
+#  Do 10 request and wait for reply
+for request in range(10):
+    print("Sending request %s ..." % request)
+    msg = input("message: ")
+    socket.send(bytes(msg))
 
-    #  Do 10 request and wait for reply
-    for request in range(10):
-        print("Sending request %s ..." % request)
-        msg = input("message: ")
-        socket.send(bytes(msg))
-
-        
-        #  Get the reply.
-        message = socket.recv()
-        print("Received reply %s [ %s ]" % (request, message))
+    
+    #  Get the reply.
+    message = socket.recv()
+    print("Received reply %s [ %s ]" % (request, message))
 \end{python}
-
 Itt az látható, hogy létrehozunk egy kontextust, majd ebből egy socketet melynek a \textit{request} típust adjuk. 
 Utána megadjuk a kapcsolat típusát, címét és a portot. Ebben a mintában 10 üzenetet tudunk küldeni, amit byte sorozatként küldi el, és minden üzenet után megvárjuk a választ. Ez lényegében a kliensünk, a következő, már C++ban írt kód pedig a szerver lesz, ami fogadja az üzeneteket és választ ad rájuk.
-
 \begin{cpp}
-    #include <zmq.hpp>
-    #include <string>
-    #include <iostream>
-    #include <windows.h>
-    int main()
-    {
-        zmq::context_t context(1);
-        zmq::socket_t socket(context, ZMQ_REP);
-        socket.bind("tcp://*:5555");
-    
-        while (true) {
-            zmq::message_t request;
-    
-            //  Wait for request
-            socket.recv(&request);
-            std::cout << "Received " << request.to_string() << std::endl;
-    
-            //  Do some 'work'
-            Sleep(1);
-    
-            //  Send reply 
-            zmq::message_t reply(5);
-            memcpy(reply.data(), "Hello", 5);
-            socket.send(reply);
-        }
-        return 0;
-    }
-\end{cpp}
+#include <zmq.hpp>
+#include <string>
+#include <iostream>
+#include <windows.h>
+int main()
+{
+    zmq::context_t context(1);
+    zmq::socket_t socket(context, ZMQ_REP);
+    socket.bind("tcp://*:5555");
 
+    while (true) {
+        zmq::message_t request;
+
+        //  Wait for request
+        socket.recv(&request);
+        std::cout << "Received " << request.to_string() << std::endl;
+
+        //  Do some 'work'
+        Sleep(1);
+
+        //  Send reply 
+        zmq::message_t reply(5);
+        memcpy(reply.data(), "Hello", 5);
+        socket.send(reply);
+    }
+    return 0;
+}
+\end{cpp}
 Felépítést tekintve nagyon hasonló a az előző kódhoz, de mivel szerverként funkcionál, így üzenetre vár, majd aztán küld egy válasz üzenetet. 
 
-Értelem szerűen ezt a kódrészt kell a DosBoxba integrálni míg az előzőt a mesterséges intelligenciába kell beágyazni. Először megkeressük azt a kódrészt ahová ezt, vagy ennek egy módosított változatát be tudjuk integrálni. Jó gondolat a jól megszokott \textit{render.cpp}-be történő bővítés, ugyanis folyamatosan figyelni kell az üzenetet és reagálni rá. Viszont ezt kipróbálva abba a problémába ütközünk, hogy a program addig "lefagy" amíg nem kap üzenetet. Ez ividens, ugyanis a \verb|socket.recv(&request)| sor lényege, hogy addig vár, amíg nem kap üzenetet. Ezt egy végtelen ciklusba rakva láthatóvá válik mi is a gond.
+Értelemszerűen ezt a kódrészt kell a DosBoxba integrálni míg az előzőt a mesterséges intelligenciába kell beágyazni. Először megkeressük azt a kódrészt ahová ezt, vagy ennek egy módosított változatát be tudjuk integrálni. Jó gondolat a jól megszokott \textit{render.cpp}-be történő bővítés, ugyanis folyamatosan figyelni kell az üzenetet és reagálni rá. Viszont ezt kipróbálva abba a problémába ütközünk, hogy a program addig "lefagy" amíg nem kap üzenetet. Ez ividens, ugyanis a \verb|socket.recv(&request)| sor lényege, hogy addig vár, amíg nem kap üzenetet. Ezt egy végtelen ciklusba rakva láthatóvá válik mi is a gond.
 
 Ennek kiküszöbölése érdekében egy külön függvényben kell definiálni a szerver kódját, majd egy új szálat indítani, és ennek párhuzamosan kell futnia a program többi részével. Így nem fagy le a programunk, és a fentebb leírt periféria manipuláló függvényeket is meg tudjuk hívni.
-
 \begin{cpp}
-
-    void ZeroMQLoop()
+void ZeroMQLoop()
 {
-	zmq::context_t context(1);
-	zmq::socket_t socket(context, ZMQ_REP);
-	socket.bind("tcp://*:5555");
+    zmq::context_t context(1);
+    zmq::socket_t socket(context, ZMQ_REP);
+    socket.bind("tcp://*:5555");
 
-	while (true) {
-		zmq::message_t request;
+    while (true) {
+        zmq::message_t request;
 
-		//  Wait for next request from client
-		socket.recv(&request);
-		LOG_MSG(request.to_string().c_str());
+        //  Wait for next request from client
+        socket.recv(&request);
+        LOG_MSG(request.to_string().c_str());
 
-		std::vector<std::string> result;
-		std::istringstream iss(request.to_string());
-		for (std::string s; iss >> s; )
-			result.push_back(s);
+        std::vector<std::string> result;
+        std::istringstream iss(request.to_string());
+        for (std::string s; iss >> s; )
+            result.push_back(s);
 
-		if (result[0] == "Click")
-		{
-			// Click code
-		}
+        if (result[0] == "Click")
+        {
+            // Click code
+        }
+        else if (result[0] == "Move")
+        {
+            // Move code
+        }
 
-		else if (result[0] == "Move")
-		{
-			// Move code
+        else if (result[0] == "Gather")
+        {
+            // Gather code
+        }
+        else if (result[0] == "Attack")
+        {
+            // Attack code
+        }
+        else if (result[0] == "Start")
+        {
+            // Start code
+        }
 
-		}
-
-		else if (result[0] == "Gather")
-		{
-			// Gather code
-		}
-
-		else if (result[0] == "Attack")
-		{
-			// Attack code
-		}
-
-		else if (result[0] == "Start")
-		{
-			// Start code
-		}
-
-		//  Send reply back to client
-		zmq::message_t reply(5);
-		memcpy(reply.data(), "Done", 4);
+        //  Send reply back to client
+        zmq::message_t reply(5);
+        memcpy(reply.data(), "Done", 4);
 		
-		socket.send(reply);
+        socket.send(reply);
 	}
-
-    
+}
 \end{cpp}
 
-\Section{AI}
+\Section{AI megvalósítása}
 
 A DosBox módosítása után a konkrét program megírása következik. A legjobb megoldás ehhez az, ha egy külön osztályt készítünk az AI-nak, és annak definiáljuk az adattagokat és metódusokat. Ehhez fel kell írni hogy mégis milyen adatokra van szükség.
-
 \begin{itemize}
     \item Tudni kell hogy az egyes nyersanyagokból éppen mennyi áll rendelkezésre
     \item A térkép jelenlegi állását/állásait is le kell menteni
     \item Elvégzendő parancsok listája
     \item Kapcsolat a DosBox-al
 \end{itemize}
+Természetesen a lista nem teljes, fejlesztés során bővülhet, de a legfontosabb dolgokat tartalmazza
 
-\textit{Természetesen a lista nem teljes, fejlesztés során bővülhet, de a legfontosabb dolgokat tartalmazza}
+\SubSection{Működés részletes leírása}
 
-\subsection{Működés részletes leírása}
-
-Ezt követően létre kell hozni a kapcsolatot az "agy" és a "test között". Ugyanis technikailag a "gondolkodást" a pythonban írt AI fogja véghez vinni, elküldeni a teendőket a DosBoxna, majd az végrehajtja. Az adatok küldéséhez az előző pontban leírt
+Ezt követően létre kell hozni a kapcsolatot az "agy" és a "test között". Ugyanis technikailag a "gondolkodást" a Python-ban írt AI fogja véghez vinni, elküldeni a teendőket a DosBoxna, majd az végrehajtja. Az adatok küldéséhez az előző pontban leírt
 ZeroMQ-s megoldást fogjuk használni. Az AI osztályunk példányosítása után, a \textit{Start()} metódussal indítható, és a \textit{Stop()} metódussal állítható meg. 
 
 A végtelen ciklust itt is érdemes megtartani, ugyanis nem tudhatjuk meddig szeretné a felhasználó használni a programot, és szinte másodpercenként üzenetet kell továbbítania, így ezért sem előnyös leállítani. Az egyszerű
 leállítás érdekében ugyanakkor a ciklust egy try blokkban definiáltam, ami kivételt dob amennyiben a felhasználó billentyűzet megszakítást küld (példálul ctrl+c a terminálban) a program elkezdi a leállás folyamatát, megszakítja a kapcsolatot a DosBoxal és leáll.
 
-Ennek függvényében nézzük meg milyen lépések vannak:
+Ennek függvényében nézzük meg milyen lépései \aref{fig:lepesek}. ábrán láthatóak.
 
 \begin{figure}[h]
     \centering
@@ -390,20 +371,19 @@ Ennek függvényében nézzük meg milyen lépések vannak:
     \label{fig:lepesek}
 \end{figure}
 
-Ezen az ábrán jól látható a ciklikusság, továbbá az is, hogy a program terminálódása életciklusának bármelyik szakaszában bekövetkezhet, amikor is megszakítást kap a felhasználótól.
+Észrevehető a ciklikusság, továbbá az is, hogy a program terminálódása életciklusának bármelyik szakaszában bekövetkezhet, amikor is megszakítást kap a felhasználótól.
 
 Az összképet látva, első dolgunk, még mielőtt bármiféle logikát be tudnánk programozni, a tervben szereplő adatfeldolgozás létrehozása, azaz lementett képből kell olyan használható adatokat kinyerni, amelyek segítségével konkrét parancsot lehet előállítani. 
 A beolvasáshoz a config fájlban használt elérési útvonalat tudjuk használni, így könnyen változtathatóak.
 
 Alapértelmezett konfigurációs fájl:
 \begin{python}
-    class Config:
-        tesseract = r".\TesseractOCR\tesseract.exe"
-        capture = r".\capture\war_000.png"
+class Config:
+    tesseract = r".\TesseractOCR\tesseract.exe"
+    capture = r".\capture\war_000.png"
 \end{python}
 
 Kép beolvasása:
-
 \begin{python}
     ...
 
@@ -416,6 +396,7 @@ Kép beolvasása:
         ...
 \end{python}
 
+Egy beolvasott kép \aref{fig:abra}. ábrán látható formában néz ki.
 
 \begin{figure}[h]
 \centering
@@ -424,12 +405,11 @@ Kép beolvasása:
 \label{fig:abra}
 \end{figure}
 
-Beolvasás után jöhet az adatok kinyerési. Itt van egy kis szabadságunk hogy mivel kezdünk, én úgy gondoltam a nyersanyagok számának meghatározását veszem előre. A függvény bemenetként a nyersanyag nevét kéri, és ndarray-t, 
+Beolvasás után jöhet az adatok kinyerési. Itt van egy kis szabadságunk a tekintetben, hogy mivel kezdünk. Úgy gondoltam a nyersanyagok számának meghatározását veszem előre. A függvény bemenetként a nyersanyag nevét kéri, és ndarray-t, 
 ami lényegében a beolvasott kép azon szelete ahol az adott nyersanyag található.
 Maga a függvény így néz ki:
-
 \begin{python}
-def ReadText(self,name: str,cropImage: np.ndarray):
+def ReadText(self, name: str,cropImage: np.ndarray):
 
     if cropImage is None:
         return
@@ -467,26 +447,25 @@ A \textit{res} változóban lesz maga kivágott kép nagyított változata, amih
 
 Annak érdekében hogy a \textit{tesseract} képes legyen felismerni a számokat, a színes képet érdemes szürkeárnyalatos képpé alakítani alakítani, ezt a \textit{gray} változóba tároljuk a \textit{cv2.cvtColor} függvény segítségével, aminek a használata elég egyszerű
 megadjuk a módosítani kívánt képet, és a módosítást. Ez esetben ez a \textit{cv2.COLOR\_BGR2GRAY} lesz, amivel egyszerűen elérhető a kívánt eredmény.
-Habár a szürke árnyalatos kép hatalmas előrelépés, egy küszöbérték függvény is érdemes alkalmazni amivel ki tudjuk emelni a számunkra fontos adatokat a képen, ami ez esetben maga a szám.
-
+Habár a szürke árnyalatos kép hatalmas előrelépés, egy küszöbérték függvény is érdemes alkalmazni amivel ki tudjuk emelni a számunkra fontos adatokat a képen, ami ez esetben maga a szám (\ref{fig:orig}. ábra).
 
 % ref: https://www.geeksforgeeks.org/python-thresholding-techniques-using-opencv-set-1-simple-thresholding/
 
 \begin{equation*}
-    output(x,y) = \left\{ 
+    output(x, y) = \left\{ 
     \begin{matrix}
-        max, & \text{ha } input(x,y) > thres \\
-        0, & \text{egyébként}
+        max, & \text{ha } input(x, y) > thres, \\
+        0, & \text{egyébként}.
     \end{matrix} \right.
 \end{equation*}
 
 Ennek az inverze
 
 \begin{equation*}
-    outputinv(x,y) = \left\{ 
+    outputinv(x, y) = \left\{ 
     \begin{matrix}
-        0, & \text{ha } input(x,y) > thres \\
-        max, & \text{egyébként}
+        0, & \text{ha } input(x ,y) > thres, \\
+        max, & \text{egyébként}.
     \end{matrix} \right.
 \end{equation*}
 
@@ -495,12 +474,12 @@ Ennek az inverze
     \includegraphics[scale=1]{images/grey.png}
     \includegraphics[scale=1]{images/thres.png}
     \caption{Szürkeárnyalatos (bal) és küszöbértékes (jobb) kép.}
-    \label{fig:numbers}
+    \label{fig:orig}
 \end{figure}
 
-A következő lépés az úgynevezett \textit{skeletonization}{\cite{skeletonization}}, aminek lényege a kép "vázának" megjelenítése és élesítese a háttér és egyéb nem fontos információ nélkül, továbbá mivel az eredeti kép "pixeles", valahogyan le kell kerekíteni hogy a Tesseract könnyebben felismerje, a skeletonization ebben is a segítségünkre van. Utolsó lépésnek invertálni kell a képet, hogy a szám az fekete legyen, ezt a \textit{~} karakter segítségével tehetjük meg.
+A következő lépés az úgynevezett \textit{skeletonization} {\cite{skeletonization}}, aminek lényege a kép "vázának" megjelenítése és élesítese a háttér és egyéb nem fontos információ nélkül, továbbá mivel az eredeti kép "pixeles", valahogyan le kell kerekíteni hogy a Tesseract könnyebben felismerje, a skeletonization ebben is a segítségünkre van. Utolsó lépésnek invertálni kell a képet, hogy a szám az fekete legyen, ezt a \textit{~} karakter segítségével tehetjük meg.
 
-A fájlba mentés opcionális, mivel nem kell beolvasni, de megnyitva ez látható: 
+A fájlba mentés opcionális, mivel nem kell beolvasni, de megnyitva például \aref{fig:numbers}. ábrán látható eredményt találjuk.
 
 \begin{figure}[h]
     \centering
@@ -511,12 +490,11 @@ A fájlba mentés opcionális, mivel nem kell beolvasni, de megnyitva ez láthat
 \end{figure}
 
 Ahogyan a nyersanyagok adatait, úgy a térkép adatait is le kell menteni. Ha térkép lemérése után azt tapasztaljuk hogy a mérete 64x64, ahol egy pixel egy tile-t jelent, azaz ezen csak egyetlen egy egység állhat. Az épületek ennél bonyolultabbak, ugyanis a méretük lehet 2x2 vagy 3x3 is, 
-de ez sem okoz akkora problémát, nyugodtan feloszthatjuk a térképet 64x64 mezőre. Nem előnyös ugyanakkor minden információt egy 64x64 méretű listában/tömbben tárolni, így az információ típusától függően 3 csoportra osztottam:
-
+de ez sem okoz akkora problémát, nyugodtan feloszthatjuk a térképet 64x64 mezőre. Nem előnyös ugyanakkor minden információt egy 64x64 méretű listában/tömbben tárolni, így az információ típusától függően 3 csoportra osztottam.
 \begin{itemize}
-    \item Nyersanyag térkép: csak a nyersanyagokat és a munkásokat tárolja
-    \item Felfedező térkép: azt az értéket tárolja hogy fel van-e fedezve az adott mező vagy sem, továbbá a saját és az ellenséges katonákat is.
-    \item Épület térkép: A felépült épületeket és utakat tárolja 
+    \item Nyersanyag térkép: csak a nyersanyagokat és a munkásokat tárolja.
+    \item Felfedező térkép: azt az értéket tárolja hogy fel van-e fedezve az adott mező vagy sem, továbbá a saját és az ellenséges katonákat is (például, mint ahogy \aref{fig:map}. ábrán látható).
+    \item Épület térkép: A felépült épületeket és utakat tárolja.
 \end{itemize}
 
 
@@ -556,7 +534,7 @@ Egy mező mérete 16x16 pixel, ugyanakkor ugyan ez a mező a térképen 1x1 pixe
     \label{fig:playArea}
 \end{figure}
 
-Itt szépen kivehető, hogy egy egység 1 mezőt foglal el, és pontosan illeszkedik ré (kivéve mozgáskor, de ez elhanyagolható), az épületek és utak körvonala is tisztán látszik hogy szabályos.
+Itt szépen kivehető, hogy egy egység 1 mezőt foglal el, és pontosan illeszkedik ré (kivéve mozgáskor, de ez elhanyagolható), az épületek és utak körvonala is tisztán látszik hogy szabályos (\ref{fig:playArea}. ábra).
 Ebből arra a következtetésre lehet jutni, hogy a játéktéren belül is érdemes mezőnként átnézni a képet és az adott 16x16-os blokkon belül érzékelni hogy milyen típusú objektumot találtunk.
 
 Ehhez egy \textit{Unit} segédosztály hozunk létre, ami megadja az általános formáját az eltárolni kívánt objektumnak.
@@ -574,18 +552,15 @@ class Unit:
 
 Mint látható egy nagyon egyszerű, csak konstruktort tartalmazó osztályról van szó, aminek pusztán annyi lényege van, hogy a könnyebb kezelhetőség érdekében "csomagba" rakja egy adott objektumra vonatkozó összes hasznos adatot.
 
-Az adattakok jelentései a következők:
+Az adattakok jelentései a következők.
 \begin{itemize}
-    \item \textit{unit id:} Megadja az egyedi azonosítót
+    \item \textit{unit id:} Megadja az egyedi azonosítót.
     \item \textit{location:} Az a hely, ahol az adott objektum spritejai vannak.
-    \item \textit{color:} A keret színét adja meg
+    \item \textit{color:} A keret színét adja meg.
     \item \textit{threshold:} Megadja a hibahatár mértékét. 
-    \item \textit{mapmode:} Megadja melyik térképre akarjuk menteni 
-    
+    \item \textit{mapmode:} Megadja melyik térképre akarjuk menteni.
 \end{itemize}
-
 Így ezt az osztályt a következő lépésben használhatjuk. Ennek a lépésnek a lényege konkrétan meghatározni hogy mit is látunk a játéktéren. Ezt egyfajta \textit{template matching}-el hajtjuk végre, melynek kódja a következő:
-
 \begin{python}
 def match_templates(self,play_area):
     img_gray = cv2.cvtColor(play_area, cv2.COLOR_BGR2GRAY)
@@ -636,17 +611,18 @@ def match_templates(self,play_area):
 Ismerős elemeket láthatunk a függvény elején, a képet szokás szerint szürkeárnyalatossá kell konvártálni, majd egy \textit{units} nevű listába példányosítjuk a szükséges objektumokat. Itt megjegyzendő, hogy a \textit{color} adattag fordított rgb sorrendben működik, a \textit{threshold} lényege pedig hogy hány százalékos legyen az egyezes (értelem szerűen 0 és 1 közötti értéket fogad el).
 
 Az algoritmust minden egyes objektumra, és azoknak minden egyes változatára lefuttatjuk. Például az embereknél a \textit{footman} nevű egység lenne maga az objektum, és annak rengeteg állapota van (lefelé néz, felfelé néz, jobbra néz stb.) így azokat is ellenőrizni kell hogy rajta vannak-e a játéktéren. Továbbá a \textit{cv2.flip()} függvény
-segítségével ezeknek a tükörképét is ellenőrizzük, ugyanis lehetséges hogy valamelyik mozdulatnak a tükörképe is létezik. Ez a folyamat habár hosszúnak tűnhet a sok egymásba ágyazott \textit{for} ciklus miatt, nem vesz el szignifikáns számítási időt tapasztalatom szerint, ami a kép viszonylag apró mérete miatt lehetséges. 
+segítségével ezeknek a tükörképét is ellenőrizzük, ugyanis lehetséges hogy valamelyik mozdulatnak a tükörképe is létezik. Ez a folyamat habár hosszúnak tűnhet a sok egymásba ágyazott \textit{for} ciklus miatt, nem vesz el szignifikáns számítási időt tapasztalatom szerint, ami a kép viszonylag apró mérete miatt lehetséges. Az elemzés eredményét \aref{fig:template}. ábrán láthatjuk.
 
 \begin{figure}[h]
     \centering
     \includegraphics[scale=1]{images/res.png}
     \caption{A template matching eredménye}
-    \label{fig:rect}
+    \label{fig:template}
 \end{figure}
 \pagebreak
-Most hogy az összes adat a rendelkezésünkre áll, ideje megnézni a fentebb beszélt fázisokat bővebben.
-A lépéseket az alábbi ábra szemlélteti:
+Most, hogy az összes adat a rendelkezésünkre áll, ideje megnézni a fentebb beszélt fázisokat bővebben.
+A lépéseket \aref{fig:phases}. ábra szemlélteti:
+
 \begin{figure}[h]
     \centering
     \includegraphics[scale=0.4]{images/phases.png}
@@ -654,15 +630,13 @@ A lépéseket az alábbi ábra szemlélteti:
     \label{fig:phases}
 \end{figure}
 
-Mint látható ez is ciklikusan történik, mégpedig úgy, hogy a ciklus elindul a nyersanyag gyűjtési fázisnál, eldöntésre kerül milyen parancsokat kell tovább küldeni, majd amikor beolvasásra került a következő kép, akkor folytatódik a felfedezési fázissal. Így gyakorlatilag minden 5. beolvasás után térünk vissza az eredeti állapotba.
-
+\noindent Mint látható, ez is ciklikusan történik, mégpedig úgy, hogy a ciklus elindul a nyersanyag gyűjtési fázisnál, eldöntésre kerül milyen parancsokat kell tovább küldeni, majd amikor beolvasásra került a következő kép, akkor folytatódik a felfedezési fázissal. Így gyakorlatilag minden 5. beolvasás után térünk vissza az eredeti állapotba.
 \begin{enumerate}
     \item \textbf{Nyersanyag gyűjtés}
 
     Ebben a fázisban átnézzük a térképet, amelyet az előző lépésekben feltöltöttünk adatokkal. Kigyűjtjük a parasztok, fák és aranybányák koordinátáit, majd elküldjük őket dolgozni vagy felfedezni, az alapján hogy van-e nyersanyag a játéktéren.
 
     \begin{python}
-        
 def GatherPhase(self):
     peasants = []
     trees = []
@@ -807,7 +781,8 @@ if(len(self.commands) != 0):
         message = self.socket.recv()
         print(f"Received reply {message}")
 \end{python}
-\section{Stratégia}
+
+\Section{A gépi játékos stratégiája}
 
 Nem követ bonyolult stratégiát a program, a mihamarabbi nyersanyag szerzésre és felfedezésre fekteti a hangsúlyt, inkább passzívan játszik a nyersanyagok felhalmozása érdekében. Mivel az ellenfél eléggé kiszámíthatatlan, gyakran kerül olyan helyzetbe az MI hogy felkészületlenül érik a támadások, ugyanakkor ha elég idő van rá képes lehet a felzárkózásra.
 
@@ -816,7 +791,7 @@ Következő lépés a leírtak szerint a katonákkal kell kezdeni valamit, ami "
 
 Ezek után a kiképzés következik, ami az elérhető épületektől függ, a városházán parasztokat képez, míg a katonai épületekben katonákat képez ki.
 
-\section{Limitációk}
+\Section{Az elkészített szoftver limitációi}
 
 Sajnos mint minden programnak, ennek is megvannak a hátrányai. A fejlesztés során azt tapasztaltam, hogy a Dosboxon belül kiadott folytonos egymás után történi kattintás/billenytű parancs hatására némelyik akció "elveszlik". Lehetséges hogy ez egy beépített mechanizmus hogy a fals inputokat kiszűrje, van ehhez hasonló a kódban, de annak kivételekor az egész input rendszer működésképtelen, így a megkerülése lehetetlen.
 
