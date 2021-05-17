@@ -1,0 +1,108 @@
+			The Warcraft Unit Editor
+
+1.  What This Utility Changes
+2.  Creation and Configuration
+3.  Bug Report
+
+
+WHAT THIS UTILITY CHANGES
+
+This utility will allow Warcraft owners to alter numerous characteristics of 
+every unit in the game.  We strove to make as many of the game aspects able 
+to be edited as possible through this program. Although not every change was 
+possible,  players will be able to edit the following aspects within the game:
+
+1.  Edit Men
+2.  Edit Buildings
+3.  Edit Spells
+4.  Edit Technology
+
+
+1.  Edit Men
+    Attack Range:  This is the range that your units can attack.  
+    This can only be edited if the unit has an initial ranged attack 
+    (archers, spearmen, etc.)
+	
+    Armor Points:  This is the amount of armor each unit has.  
+    Armor stops damage before it reaches the target.
+	
+    Hit Points:  This is the amount of damage a unit can sustain before dying.
+
+    Minimum Damage:  This is the amount of damage that a unit will ALWAYS do 
+    regardless of armor.
+	
+    Random Damage: This is the potential amount of damage that the units 
+    attack can do.
+	
+    Time to Build:  This is the time increments that each unit takes to train.
+    
+    Gold Cost:  This is the amount of gold that the unit costs to train.
+    
+    Lumber Cost: This is the amount of lumber that the unit costs to train.
+    
+    Decay Rate:  This is how long summoned creatures remain in play before 
+    taking damage.
+
+2.  Edit Buildings
+    Armor Points:  The amount of armor that each building has. 
+    Armor stops damage before it reaches the target.
+	
+    Hit Points:  This is the amount of damage a building can sustain 
+    before being destroyed.
+	
+    Time to Build:  This is the time increments that each building takes 
+    to construct.
+	
+    Gold Cost:  This is the amount of gold that the building costs 
+    to construct.
+	
+    Lumber Cost: This is the amount of lumber that the building costs 
+    to construct.
+
+3.  Edit Spells
+    Range: This is the range that your spells can be cast.  
+    This can only be edited if the spell has an initial range 
+    (cloud of poison, rain of fore, etc.)
+
+4.  Edit Technology
+    Time to Research:  This is the time increments that each technology 
+    takes to upgrade.
+
+CREATION AND CONFIGURATION
+
+When you have made edits to your units and buildings, you will have the 
+options to load configuration, save configuration, and Configure WAR_HACK.EXE 
+with current settings.
+
+Load Configuration:  This is for saved WAR_HACK configurations that you wish 
+to further edit.
+
+Save Configuration:  This is to save a WAR_HACK configuration for later 
+editing.
+
+Configure WAR_HACK.EXE with current settings:  This is to save a WAR_HACK 
+Configuration for use within a Warcraft game.
+
+Note:  Both WAR_HACK.EXE files must be (A) configured identically for 
+two-player games.  If the files are incompatible, you will receive an 
+"Incorrect Version Number" message.  Make sure that the two versions of 
+WAR_HACK.EXE have the same changes to units, buildings, spells and 
+technologies in them.
+
+BUG REPORT  
+
+If you edit Warcraft so that the Hit Points are at maximum for a unit type, 
+save the game, and then re-edit so that those units have less hit points, 
+some of the originally edited units MAY have an incorrect HP bar, in that it 
+will be longer than normal.  The statistics that have changed will be correct, 
+and this bug is only a cosmetic flaw that does not affect game play.
+
+
+Blizzard plans to electronically release the Warcraft Unit Editor in January
+of 1995 through America On-line, CompuServe, Internet and the Blizzard IceNet.
+This utility will be offered FREE to fans of the real time Fantasy/Strategy
+hit Warcraft: Orcs and Humans as a response to their desires to take elements
+of the game design into their own hands. Blizzard Entertainment looks forward
+to offering continued support and service of their products that meets the
+needs and desires of their customers.  Please feel free to distribute this 
+program to other Warcraft players.
